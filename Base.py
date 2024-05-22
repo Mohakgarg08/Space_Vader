@@ -19,6 +19,7 @@ BLUE = (0, 0, 255)
 MAX_BULLETS = 3
 POINT_THRESHOLD = 20
 
+
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Space Invaders")
 class Player(pygame.sprite.Sprite):
@@ -32,7 +33,7 @@ class Player(pygame.sprite.Sprite):
         self.speed = PLAYER_SPEED
         self.lives = 3
         self.score = 0
-
+        
     def update(self, keys):
         if keys[pygame.K_LEFT] and self.rect.left > 0:
             self.rect.x -= self.speed
@@ -86,6 +87,7 @@ class ScoreText(pygame.sprite.Sprite):
         else:
             self.image.set_alpha(self.alpha)
             self.rect.y -= 1
+
 
 # Sprite Groups
 player = Player()
