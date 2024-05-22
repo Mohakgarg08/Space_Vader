@@ -17,11 +17,13 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 MAX_BULLETS = 3
-POINT_THRESHOLD = 20
+MAX_WINS=3
 
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Space Invaders")
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -33,12 +35,17 @@ class Player(pygame.sprite.Sprite):
         self.speed = PLAYER_SPEED
         self.lives = 3
         self.score = 0
+        self.wins= 0 
+    
+    def win(self):
+        self.wins+=1
         
     def update(self, keys):
         if keys[pygame.K_LEFT] and self.rect.left > 0:
             self.rect.x -= self.speed
         if keys[pygame.K_RIGHT] and self.rect.right < SCREEN_WIDTH:
             self.rect.x += self.speed
+
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, size=(40, 30)):
@@ -52,24 +59,47 @@ class Enemy(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.x += self.speed
-        if self.rect.right >= SCREEN_WIDTH or self.rect.left <= 0:
-            self.speed = -self.speed
-            self.rect.y += ENEMY_DROP
+        return self.rect.right >= SCREEN_WIDTH or self.rect.left <= 0
+
+
+
+class Enemy_Wave():
+    def __init__(self):
+        self.enemies= []
+        self.wavelost= False
+    def addenemy(self, enemy):
+        self.enemies.append(enemy)
+
+    def update(self):
+        shoulddrop=False
+        for enemy in enemies:
+            if enemy.update():
+                shoulddrop= True
+        if shoulddrop:
+            for enemy in enemies:
+                enemy.rect.y+= ENEMY_DROP
+                enemy.speed=-enemy.speed
+                if enemy.rect.y>=SCREEN_HEIGHT-50:
+                    self.wavelost= True
+
+
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y,color, speed):
         super().__init__()
         self.image = pygame.Surface((5, 15))
-        self.image.fill(BLUE)
+        self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.centerx = x
         self.rect.bottom = y
-        self.speed = BULLET_SPEED
+        self.speed = speed
 
     def update(self):
         self.rect.y -= self.speed
         if self.rect.bottom < 0:
             self.kill()
+
+
 
 class ScoreText(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -87,13 +117,7 @@ class ScoreText(pygame.sprite.Sprite):
         else:
             self.image.set_alpha(self.alpha)
             self.rect.y -= 1
-
             
-def music():
-    pygame.mixer.music.load("SpaceInvadersmusic.wav")
-    pygame.mixer.music.set_volume(60)
-    pygame.mixer.music.play()
-music()
 
 # Sprite Groups
 player = Player()
@@ -101,15 +125,19 @@ all_sprites = pygame.sprite.Group(player)
 enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 score_texts = pygame.sprite.Group()
+wave=Enemy_Wave()
+
 
 # Create Enemies
 def create_enemies():
+    wave.enemies.clear()
     for i in range(8):
         for j in range(4):
             enemy = Enemy(100 + i * 80, 50 + j * 50)
             all_sprites.add(enemy)
             enemies.add(enemy)
-
+            wave.addenemy(enemy)
+            
 create_enemies()
 
 def draw_text(text, size, color, x, y):
@@ -134,6 +162,9 @@ def main_menu():
                 exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
+                    pygame.mixer.music.load("SpaceInvadersmusic.wav")
+                    pygame.mixer.music.set_volume(60)
+                    pygame.mixer.music.play()
                     menu = False
                 if event.key == pygame.K_c:
                     show_controls()
@@ -169,13 +200,15 @@ def main():
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and len(bullets) < MAX_BULLETS:
-                    bullet = Bullet(player.rect.centerx, player.rect.top)
+                    bullet = Bullet(player.rect.centerx, player.rect.top, BLUE, BULLET_SPEED)
                     all_sprites.add(bullet)
                     bullets.add(bullet)
 
+
         # Update
         player.update(keys)
-        enemies.update()
+        #enemies.update()
+        wave.update()
         bullets.update()
         score_texts.update()
 
@@ -188,21 +221,32 @@ def main():
                     all_sprites.add(score_text)
                     score_texts.add(score_text)
 
-        if player.score >= POINT_THRESHOLD:
-            for enemy in enemies:
-                enemy.kill()
-            for i in range(8):
-                for j in range(4):
-                    enemy = Enemy(100 + i * 80, 50 + j * 50, size=(60, 45))
-                    ENEMY_SPEED = 5
-                    all_sprites.add(enemy)
-                    enemies.add(enemy)
+       # if player.score >= POINT_THRESHOLD:
+        #    for enemy in enemies:
+         #       enemy.kill()
+          #  for i in range(8):
+           #     for j in range(4):
+            #        enemy = Enemy(100 + i * 80, 50 + j * 50, size=(60, 45))
+             #       ENEMY_SPEED = 5
+              #      all_sprites.add(enemy)
+               #     enemies.add(enemy)
 
         if not enemies:
             draw_text("YOU WIN!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+            player.win()
             pygame.display.flip()
             pygame.time.wait(2000)
-            running = False
+            if player.wins>=MAX_WINS:
+                running = False
+            else:
+                create_enemies()
+                for bullet in bullets:
+                    bullet.kill()
+        if wave.wavelost:
+            draw_text("YOU LOST!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+            pygame.display.flip()
+            pygame.time.wait(2000)
+            running= False
 
         #this just makes eeverything
         screen.fill(BLACK)
