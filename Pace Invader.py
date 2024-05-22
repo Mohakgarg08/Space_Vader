@@ -13,30 +13,30 @@ screen = pygame.display.set_mode(GAME_RES)
 # https://stackoverflow.com/questions/68567945/what-is-the-easiest-way-to-make-a-triangles
 screen.fill((0, 0, 0))
 
-def triangle():
-    x = 200
-    y = 200
-    width = 20
-    height = 20
-    vel = 5  # Velocity
+
+x = 200
+y = 200
+width = 20
+height = 20
+vel = 5  # Velocity
 
 
-    run= True
-    while run:
-        pygame.time.delay(35)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-        keys = pygame.key.get_pressed()
-        # Move left
-        if keys[pygame.K_LEFT] and x > vel:
-            x -= vel
-        # Move right
-        if keys[pygame.K_RIGHT] and x < 500 - width - vel:
-            x += vel
-        screen.fill((0, 0, 0))
-        tr = pygame.draw.polygon(screen, (255,0,0), ((x,y),(x+150,y),(x+75,y-200)))
-        pygame.display.update()
+run= True
+while run:
+    pygame.time.delay(35)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+    keys = pygame.key.get_pressed()
+    # Move left
+    if keys[pygame.K_LEFT] and x > vel:
+        x -= vel
+    # Move right
+    if keys[pygame.K_RIGHT] and x < 500 - width - vel:
+        x += vel
+    screen.fill((0, 0, 0))
+    tr = pygame.draw.polygon(screen, (255,0,0), ((x,y),(x+150,y),(x+75,y-200)))
+    pygame.display.update()
 
    
 #class Player():
