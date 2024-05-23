@@ -23,7 +23,6 @@ MAX_WINS=3
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Space Invaders")
 
-
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -60,7 +59,6 @@ class Enemy(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.speed
         return self.rect.right >= SCREEN_WIDTH or self.rect.left <= 0
-
 
 
 class Enemy_Wave():
@@ -210,6 +208,9 @@ def main():
                     bullet = Bullet(player.rect.centerx, player.rect.top, BLUE, BULLET_SPEED)
                     all_sprites.add(bullet)
                     bullets.add(bullet)
+                    pygame.mixer.music.load("shoot.wav")
+                    pygame.mixer.music.set_volume(40)
+                    pygame.mixer.music.play()
 
 
         # Update
@@ -228,6 +229,7 @@ def main():
         enemybullets.update()
         score_texts.update()
 
+
         hits = pygame.sprite.groupcollide(bullets, enemies, True, True)
         if hits:
             for hit in hits.values():
@@ -236,13 +238,22 @@ def main():
                     score_text = ScoreText(enemy.rect.centerx, enemy.rect.centery)
                     all_sprites.add(score_text)
                     score_texts.add(score_text)
+                    pygame.mixer.music.load("invaderkilled.wav")
+                    pygame.mixer.music.set_volume(40)
+                    pygame.mixer.music.play()
         
-        hits = pygame.sprite.groupcollide(enemybullets, playergroup, True, True)
+        hits = pygame.sprite.groupcollide(enemybullets, playergroup, True, False)
         if hits:
-            draw_text("YOU LOST!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-            pygame.display.flip()
-            pygame.time.wait(2000)
-            running= False
+            player.lives-=1 
+            player
+            pygame.mixer.music.load("explosion.wav")
+            pygame.mixer.music.set_volume(40)
+            pygame.mixer.music.play()
+            if player.lives==0:
+                draw_text("YOU LOST!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+                pygame.display.flip()
+                pygame.time.wait(2000)
+                running= False
 
        # if player.score >= POINT_THRESHOLD:
         #    for enemy in enemies:
