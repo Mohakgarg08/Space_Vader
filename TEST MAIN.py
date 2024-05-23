@@ -26,7 +26,7 @@ pygame.display.set_caption("Space Invaders")
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load('invader.png').convert_alpha()
+        self.image = pygame.image.load('invaders.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (50, 30))
         self.rect = self.image.get_rect()
         self.rect.centerx = SCREEN_WIDTH // 2
