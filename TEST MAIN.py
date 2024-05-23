@@ -29,9 +29,6 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load('invader.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (50, 30))
         self.rect = self.image.get_rect()
-        #self.image = pygame.Surface((50, 30))
-        #self.image.fill(GREEN)
-        #self.rect = self.image.get_rect()
         self.rect.centerx = SCREEN_WIDTH // 2
         self.rect.bottom = SCREEN_HEIGHT - 10
         self.speed = PLAYER_SPEED
@@ -53,7 +50,7 @@ class Player(pygame.sprite.Sprite):
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, size=(40, 30)):
         super().__init__()
-        self.image = pygame.image.load('Aliens.png').convert_alpha()
+        self.image = pygame.image.load('EnemyShip.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (50, 30))
         self.rect = self.image.get_rect()
         #self.image = pygame.Surface(size)
