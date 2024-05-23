@@ -26,7 +26,7 @@ pygame.display.set_caption("Space Invaders")
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load('invaders.png').convert_alpha()
+        self.image = pygame.image.load('Images/invaders.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (50, 30))
         self.rect = self.image.get_rect()
         self.rect.centerx = SCREEN_WIDTH // 2
@@ -44,13 +44,14 @@ class Player(pygame.sprite.Sprite):
             self.rect.x -= self.speed
         if keys[pygame.K_RIGHT] and self.rect.right < SCREEN_WIDTH:
             self.rect.x += self.speed
+
             
 
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, size=(40, 30)):
         super().__init__()
-        self.image = pygame.image.load('EnemyShip.png').convert_alpha()
+        self.image = pygame.image.load('Images/EnemyShip.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (50, 30))
         self.rect = self.image.get_rect()
         #self.image = pygame.Surface(size)
@@ -63,7 +64,8 @@ class Enemy(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.speed
         return self.rect.right >= SCREEN_WIDTH or self.rect.left <= 0
-#hello
+        return self.rect.up >= SCREEN_HEIGHT or self.rect.down <= 0
+
 
 class Enemy_Wave():
     def __init__(self):
@@ -171,7 +173,7 @@ def main_menu():
                 exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    pygame.mixer.music.load("SpaceInvadersmusic.wav")
+                    pygame.mixer.music.load("Sounds/SpaceInvadersmusic.wav")
                     pygame.mixer.music.set_volume(60)
                     pygame.mixer.music.play()
                     menu = False
@@ -212,7 +214,7 @@ def main():
                     bullet = Bullet(player.rect.centerx, player.rect.top, BLUE, BULLET_SPEED)
                     all_sprites.add(bullet)
                     bullets.add(bullet)
-                    pygame.mixer.music.load("shoot.wav")
+                    pygame.mixer.music.load("Sounds/shoot.wav")
                     pygame.mixer.music.set_volume(40)
                     pygame.mixer.music.play()
 
@@ -242,7 +244,7 @@ def main():
                     score_text = ScoreText(enemy.rect.centerx, enemy.rect.centery)
                     all_sprites.add(score_text)
                     score_texts.add(score_text)
-                    pygame.mixer.music.load("invaderkilled.wav")
+                    pygame.mixer.music.load("Sounds/invaderkilled.wav")
                     pygame.mixer.music.set_volume(40)
                     pygame.mixer.music.play()
         
@@ -250,7 +252,7 @@ def main():
         if hits:
             player.lives-=1 
             player
-            pygame.mixer.music.load("explosion.wav")
+            pygame.mixer.music.load("Sounds/explosion.wav")
             pygame.mixer.music.set_volume(40)
             pygame.mixer.music.play()
             if player.lives==0:
