@@ -63,7 +63,7 @@ class Enemy(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.speed
         return self.rect.right >= SCREEN_WIDTH or self.rect.left <= 0
-
+#hello
 
 class Enemy_Wave():
     def __init__(self):
