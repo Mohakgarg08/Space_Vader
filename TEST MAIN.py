@@ -44,11 +44,24 @@ class Player(pygame.sprite.Sprite):
             self.rect.x -= self.speed
         if keys[pygame.K_RIGHT] and self.rect.right < SCREEN_WIDTH:
             self.rect.x += self.speed
-        if keys[pygame.K_UP] and self.rect.up < SCREEN_HEIGHT:
+        if keys[pygame.K_UP] and self.rect.top > 300:
+            self.rect.y -= self.speed
+        if keys[pygame.K_DOWN] and self.rect.bottom < 595:
             self.rect.y += self.speed
-        if keys
             
-
+class Powerups(pygame.sprite.Sprite):
+    def __init__(self, x, y, size=(50,50)):
+        super().__init__()
+        self.image = pygame.Surface((5, 15))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        
+    
+    def update(self):
+        self.rect.x == 0
+        
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, size=(40, 30)):
@@ -66,6 +79,7 @@ class Enemy(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.speed
         return self.rect.right >= SCREEN_WIDTH or self.rect.left <= 0
+    
         
 
 
@@ -141,6 +155,7 @@ bullets = pygame.sprite.Group()
 enemybullets = pygame.sprite.Group()
 score_texts = pygame.sprite.Group()
 wave=Enemy_Wave()
+
 
 
 def create_enemies():
@@ -220,6 +235,8 @@ def main():
                     pygame.mixer.music.load("Sounds/shoot.wav")
                     pygame.mixer.music.set_volume(40)
                     pygame.mixer.music.play()
+            
+
 
 
         player.update(keys)
@@ -258,7 +275,7 @@ def main():
             pygame.mixer.music.set_volume(40)
             pygame.mixer.music.play()
             if player.lives==0:
-                draw_text("YOU LOST!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+                draw_text("YOU LOST!", 64, RED, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
                 pygame.display.flip()
                 pygame.time.wait(2000)
                 running= False
