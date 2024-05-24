@@ -44,7 +44,9 @@ class Player(pygame.sprite.Sprite):
             self.rect.x -= self.speed
         if keys[pygame.K_RIGHT] and self.rect.right < SCREEN_WIDTH:
             self.rect.x += self.speed
-
+        if keys[pygame.K_UP] and self.rect.up < SCREEN_HEIGHT:
+            self.rect.y += self.speed
+        if keys
             
 
 
@@ -64,7 +66,7 @@ class Enemy(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.speed
         return self.rect.right >= SCREEN_WIDTH or self.rect.left <= 0
-        return self.rect.up >= SCREEN_HEIGHT or self.rect.down <= 0
+        
 
 
 class Enemy_Wave():
@@ -131,7 +133,6 @@ class ScoreText(pygame.sprite.Sprite):
             self.rect.y -= 1
             
 
-# Sprite Groups
 player = Player()
 playergroup= pygame.sprite.Group(player)
 all_sprites = pygame.sprite.Group(player)
@@ -142,7 +143,6 @@ score_texts = pygame.sprite.Group()
 wave=Enemy_Wave()
 
 
-# Create Enemies
 def create_enemies():
     wave.enemies.clear()
     for i in range(8):
@@ -222,7 +222,6 @@ def main():
                     pygame.mixer.music.play()
 
 
-        # Update
         player.update(keys)
         #enemies.update()
         shootingenemy= wave.update()
