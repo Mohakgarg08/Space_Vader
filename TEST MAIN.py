@@ -23,6 +23,7 @@ MAX_WINS=3
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Space Invaders")
 
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -180,10 +181,12 @@ def main_menu():
     menu = True
     while menu:
         screen.fill(BLACK)
-        draw_text("SPACE INVADERS", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4)
+        img = pygame.image.load('Images/Logo.png').convert_alpha()
+        pygame.transform.scale(img,(900, 1))
+        screen.blit(img, (0, 0))
+        pygame.display.flip()
         draw_text("Press ENTER to Start", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         draw_text("Press C for Controls", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.5)
-        pygame.display.flip()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
