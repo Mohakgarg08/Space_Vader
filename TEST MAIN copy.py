@@ -16,7 +16,7 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-MAX_BULLETS = 3
+MAX_BULLETS = 6
 MAX_WINS=3
 
 
@@ -40,7 +40,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = SCREEN_WIDTH // 2
         self.rect.bottom = SCREEN_HEIGHT - 10
         self.speed = PLAYER_SPEED
-        self.lives = 3
+        self.lives = 14
         self.score = 0
         self.wins= 0 
     
@@ -199,18 +199,18 @@ logo=pygame.sprite.Group(Logo())
 
 
 
-def create_enemies():
+def create_enemies(rows):
     wave.enemies.clear()
-    wave.setenemycount(8*4)
+    wave.setenemycount(8*rows)
     for i in range(8):
-        for j in range(4):
+        for j in range(rows):
             enemy = Enemy(100 + i * 80, 50 + j * 50)
             all_sprites.add(enemy)
             enemies.add(enemy)
             wave.addenemy(enemy)
             
             
-create_enemies()
+create_enemies(4+player.wins)
 
 def draw_text(text, size, color, x, y):
     font = pygame.font.Font(pygame.font.get_default_font(), size)
@@ -345,7 +345,7 @@ def main():
             if player.wins>=MAX_WINS:
                 running = False
             else:
-                create_enemies()
+                create_enemies(4+player.wins)
                 for bullet in bullets:
                     bullet.kill()
         if wave.wavelost:
