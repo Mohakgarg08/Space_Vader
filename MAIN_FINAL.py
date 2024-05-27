@@ -119,11 +119,11 @@ class Player(pygame.sprite.Sprite):
     def shoot(self):
         if self.powered_up:
             for offset in [-15, 0, 15]:
-                bullet = Bullet(self.rect.centerx + offset, self.rect.top, BLUE, -BULLET_SPEED)
+                bullet = Bullet(self.rect.centerx + offset, self.rect.top, bullet_img, -BULLET_SPEED)
                 all_sprites.add(bullet)
                 bullets.add(bullet)
         else:
-            bullet = Bullet(self.rect.centerx, self.rect.top, BLUE, -BULLET_SPEED)
+            bullet = Bullet(self.rect.centerx, self.rect.top, bullet_img, -BULLET_SPEED)
             all_sprites.add(bullet)
             bullets.add(bullet)
 
@@ -147,9 +147,9 @@ class Enemy(pygame.sprite.Sprite):
             self.rect.y += self.speed
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, color, speed):
+    def __init__(self, x, y, img, speed):
         super().__init__()
-        self.image = pygame.transform.scale(bullet_img, (10, 20))
+        self.image = pygame.transform.scale(img, (10, 20))
         self.rect = self.image.get_rect()
         self.rect.centerx = x
         self.rect.bottom = y
@@ -223,7 +223,7 @@ class EnemyWave:
         if self.shoottime==0:
             shooter= self.enemies[random.randint(0,len(self.enemies)-1)]
             self.shoottime=10
-            return Bullet(shooter.rect.centerx, shooter.rect.y, RED, BULLET_SPEED)
+            return Bullet(shooter.rect.centerx, shooter.rect.y, enemy_img, BULLET_SPEED)
 
 player = Player()
 player_group = pygame.sprite.Group(player)

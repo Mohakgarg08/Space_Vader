@@ -162,7 +162,7 @@ def main_menu():
                 exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    pygame.mixer.music.load("SpaceInvadersmusic.wav")
+                    pygame.mixer.music.load("Sounds\SpaceInvadersmusic.wav")
                     pygame.mixer.music.set_volume(60)
                     pygame.mixer.music.play()
                     menu = False
