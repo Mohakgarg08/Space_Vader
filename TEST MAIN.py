@@ -1,9 +1,7 @@
 import pygame
 import random
 
-
 pygame.init()
-
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -17,16 +15,15 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 MAX_BULLETS = 3
-MAX_WINS=3
-
+MAX_WINS = 3
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Space Invaders")
 
 def sign(num):
-    if num< 0:
+    if num < 0:
         return -1
-    elif num> 0:
+    elif num > 0:
         return 1
     else: 
         return 0
@@ -42,10 +39,12 @@ class Player(pygame.sprite.Sprite):
         self.speed = PLAYER_SPEED
         self.lives = 3
         self.score = 0
-        self.wins= 0 
+        self.wins = 0 
+        self.powered_up = False
+        self.powerup_time = 0
     
     def win(self):
-        self.wins+=1
+        self.wins += 1
         
     def update(self, keys):
         if keys[pygame.K_LEFT] and self.rect.left > 0:
@@ -56,21 +55,36 @@ class Player(pygame.sprite.Sprite):
             self.rect.y -= self.speed
         if keys[pygame.K_DOWN] and self.rect.bottom < 595:
             self.rect.y += self.speed
-            
+        if self.powered_up and pygame.time.get_ticks() > self.powerup_time:
+            self.powered_up = False
 
-class Powerups(pygame.sprite.Sprite):
-    def __init__(self, x, y, size=(50,50)):
+    def shoot(self):
+        if self.powered_up:
+            for offset in [-15, 0, 15]:
+                bullet = Bullet(self.rect.centerx + offset, self.rect.top, BLUE, BULLET_SPEED)
+                all_sprites.add(bullet)
+                bullets.add(bullet)
+                
+                # okay so mohak here what this is doing is that its just verifiying to check if we have a power up or nah, straight forward stuff
+        else:
+            bullet = Bullet(self.rect.centerx, self.rect.top, BLUE, BULLET_SPEED)
+            all_sprites.add(bullet)
+            bullets.add(bullet)
+
+class Powerup(pygame.sprite.Sprite):
+    def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.Surface((5, 15))
-        self.image.fill(RED)
-        self.rect = self.image.get_rect()
+        self.image = pygame.Surface((20, 20))
+        self.image.fill(GREEN)
+        self.rect = self.image.get_rect() # mohak you can change the image to what you want I couldnt decide so yup
         self.rect.x = x
         self.rect.y = y
-        
-    
+
     def update(self):
-        self.rect.x == 0
-        
+        if pygame.sprite.collide_rect(self, player):
+            player.powered_up = True
+            player.powerup_time = pygame.time.get_ticks() + 5000  # I made it so the power ups left 5 seconds, this is in milliseconds
+            self.kill()
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, size=(40, 30)):
@@ -78,9 +92,6 @@ class Enemy(pygame.sprite.Sprite):
         self.image = pygame.image.load('Images/EnemyShip.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (50, 30))
         self.rect = self.image.get_rect()
-        #self.image = pygame.Surface(size)
-        #self.image.fill(RED)
-        #self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.speed = ENEMY_SPEED
@@ -92,16 +103,16 @@ class Enemy(pygame.sprite.Sprite):
 
 class Enemy_Wave():
     def __init__(self):
-        self.enemies= []
-        self.wavelost= False
-        self.shoottime= 5
-        self.speed= ENEMY_SPEED
-        self.enemycount=0
-        self.direction=1
-        self.droptime=0
+        self.enemies = []
+        self.wavelost = False
+        self.shoottime = 5
+        self.speed = ENEMY_SPEED
+        self.enemycount = 0
+        self.direction = 1
+        self.droptime = 0
 
     def setenemycount(self, enemycount):
-        self.enemycount=enemycount
+        self.enemycount = enemycount
 
     def addenemy(self, enemy):
         self.enemies.append(enemy)
@@ -110,42 +121,35 @@ class Enemy_Wave():
         self.enemies.remove(enemy)
 
     def update(self):
-        self.droptime-=1
-        self.speed= (ENEMY_SPEED+0.125*(self.enemycount-len(self.enemies)))*self.direction
-        shoulddrop=False 
+        self.droptime -= 1
+        self.speed = (ENEMY_SPEED + 0.125 * (self.enemycount - len(self.enemies))) * self.direction
+        shoulddrop = False 
         for enemy in enemies:
-            enemy.speed=self.speed
+            enemy.speed = self.speed
             if enemy.update():
-                shoulddrop= True
-        if shoulddrop and self.droptime<=0:
-            self.droptime=10
-            self.direction*=-1
+                shoulddrop = True
+        if shoulddrop and self.droptime <= 0:
+            self.droptime = 10
+            self.direction *= -1
             for enemy in enemies:
-                enemy.rect.y+= ENEMY_DROP
-                #enemy.speed=-enemy.speed
-                if enemy.rect.y>=SCREEN_HEIGHT-50:
-                    self.wavelost= True
-        self.shoottime-=1
-        if self.shoottime==0:
-            self.shoottime=50
-            return random.randint(0,len(self.enemies)-1)
-
+                enemy.rect.y += ENEMY_DROP
+                if enemy.rect.y >= SCREEN_HEIGHT - 50:
+                    self.wavelost = True
+        self.shoottime -= 1
+        if self.shoottime == 0:
+            self.shoottime = 50
+            return random.randint(0, len(self.enemies) - 1)
 
 class FinalBoss(pygame.sprite.Sprite):
-    def __init__():
+    def __init__(self):
         pass
-        
-
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y,color, speed):
+    def __init__(self, x, y, color, speed):
         super().__init__()
         self.image = pygame.image.load('Images/bullett.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (50, 30))
         self.rect = self.image.get_rect()
-        #self.image = pygame.Surface((5, 15))
-        #self.image.fill(color)
-        #self.rect = self.image.get_rect()
         self.rect.centerx = x
         self.rect.bottom = y
         self.speed = speed
@@ -154,8 +158,6 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.y -= self.speed
         if self.rect.bottom < 0:
             self.kill()
-
-
 
 class ScoreText(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -173,7 +175,6 @@ class ScoreText(pygame.sprite.Sprite):
         else:
             self.image.set_alpha(self.alpha)
             self.rect.y -= 1
-            
 
 class Logo(pygame.sprite.Sprite):
     def __init__(self):
@@ -184,33 +185,35 @@ class Logo(pygame.sprite.Sprite):
         self.rect.centerx = 400
         self.rect.bottom = 250
 
-
 player = Player()
-playergroup= pygame.sprite.Group(player)
+playergroup = pygame.sprite.Group(player)
 all_sprites = pygame.sprite.Group(player)
 enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 enemybullets = pygame.sprite.Group()
+powerups = pygame.sprite.Group()
 score_texts = pygame.sprite.Group()
-wave=Enemy_Wave()
-logo=pygame.sprite.Group(Logo())
-
-
-
-
+wave = Enemy_Wave()
+logo = pygame.sprite.Group(Logo())
 
 def create_enemies():
     wave.enemies.clear()
-    wave.setenemycount(8*4)
+    wave.setenemycount(8 * 4)
     for i in range(8):
         for j in range(4):
             enemy = Enemy(100 + i * 80, 50 + j * 50)
             all_sprites.add(enemy)
             enemies.add(enemy)
             wave.addenemy(enemy)
-            
-            
+
 create_enemies()
+
+def spawn_powerup():
+    x = random.randint(0, SCREEN_WIDTH - 20)
+    y = random.randint(300, SCREEN_HEIGHT - 50)
+    powerup = Powerup(x, y)
+    all_sprites.add(powerup)
+    powerups.add(powerup)
 
 def draw_text(text, size, color, x, y):
     font = pygame.font.Font(pygame.font.get_default_font(), size)
@@ -224,11 +227,6 @@ def main_menu():
     while menu:
         screen.fill(BLACK)
         logo.draw(screen)
-
-        #img = pygame.image.load('Images/Logo.png').convert_alpha()
-        #pygame.transform.scale(img,(100, 1))
-        #screen.blit(img, (0, 0))
-        
         draw_text("Press ENTER to Start", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         draw_text("Press C for Controls", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.5)
         pygame.display.flip()
@@ -254,7 +252,6 @@ def show_controls():
         draw_text("Shoot: Space Bar", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 40)
         draw_text("Press ESC to go back", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.5)
         pygame.display.flip()
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -266,6 +263,7 @@ def show_controls():
 def main():
     running = True
     clock = pygame.time.Clock()
+    spawn_time = pygame.time.get_ticks()
 
     while running:
         clock.tick(60)
@@ -276,29 +274,29 @@ def main():
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and len(bullets) < MAX_BULLETS:
-                    bullet = Bullet(player.rect.centerx, player.rect.top, BLUE, BULLET_SPEED)
-                    all_sprites.add(bullet)
-                    bullets.add(bullet)
+                    player.shoot()
                     pygame.mixer.music.load("Sounds/shoot.wav")
                     pygame.mixer.music.set_volume(40)
                     pygame.mixer.music.play()
-            
 
         player.update(keys)
-        #enemies.update()
-        shootingenemy= wave.update()
-        if shootingenemy != None:
+        shootingenemy = wave.update()
+        if shootingenemy is not None:
             for enemy in enemies:
-                if shootingenemy==0:
+                if shootingenemy == 0:
                     bullet = Bullet(enemy.rect.centerx, enemy.rect.top, RED, -BULLET_SPEED)
                     all_sprites.add(bullet)
                     enemybullets.add(bullet)
                     break
-                shootingenemy-=1
+                shootingenemy -= 1
         bullets.update()
         enemybullets.update()
         score_texts.update()
+        powerups.update()
 
+        if pygame.time.get_ticks() - spawn_time > 10000:  # Spawn power-up every 10 seconds
+            spawn_powerup()
+            spawn_time = pygame.time.get_ticks()
 
         hits = pygame.sprite.groupcollide(bullets, enemies, True, True)
         if hits:
@@ -313,48 +311,36 @@ def main():
                     pygame.mixer.music.set_volume(40)
                     pygame.mixer.music.play()
 
-        
         hits = pygame.sprite.groupcollide(enemybullets, playergroup, True, False)
         if hits:
-            player.lives-=1 
-            player
+            player.lives -= 1 
             pygame.mixer.music.load("Sounds/explosion.wav")
             pygame.mixer.music.set_volume(40)
             pygame.mixer.music.play()
-            if player.lives==0:
+            if player.lives == 0:
                 draw_text("YOU LOST!", 64, RED, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
                 pygame.display.flip()
                 pygame.time.wait(2000)
-                running= False
-
-       # if player.score >= POINT_THRESHOLD:
-        #    for enemy in enemies:
-         #       enemy.kill()
-          #  for i in range(8):
-           #     for j in range(4):
-            #        enemy = Enemy(100 + i * 80, 50 + j * 50, size=(60, 45))
-             #       ENEMY_SPEED = 5
-              #      all_sprites.add(enemy)
-               #     enemies.add(enemy)
+                running = False
 
         if not enemies:
             draw_text("YOU WIN!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
             player.win()
             pygame.display.flip()
             pygame.time.wait(2000)
-            if player.wins>=MAX_WINS:
+            if player.wins >= MAX_WINS:
                 running = False
             else:
                 create_enemies()
                 for bullet in bullets:
                     bullet.kill()
+
         if wave.wavelost:
             draw_text("YOU LOST!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
             pygame.display.flip()
             pygame.time.wait(2000)
-            running= False
+            running = False
 
-        #this just makes eeverything
         screen.fill(BLACK)
         all_sprites.draw(screen)
         draw_text(f"Score: {player.score}", 18, WHITE, SCREEN_WIDTH // 2, 10)
@@ -366,6 +352,7 @@ def main():
 if __name__ == "__main__":
     main_menu()
     main()
+
 
 
 # citing my work
