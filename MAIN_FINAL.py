@@ -40,6 +40,7 @@ background_img = pygame.image.load('Images/StarBackground.png').convert_alpha()
 logo_img = pygame.image.load('Images/Logo.png').convert_alpha()
 hyperdrive_sound = pygame.mixer.Sound('Sounds/HyperDrive.mp3')
 background_music = pygame.mixer.Sound('Sounds/SpaceInvadersmusic.wav')
+lose_sound=pygame.mixer.Sound('Sounds\You Lose Sound Effect.mp3')
 
 
 def draw_text(text, size, color, x, y, font_name=None, center=False):
@@ -209,6 +210,9 @@ class EnemyWave:
                 player.score -= 10
                 if player.score < 0:  
                     draw_text("YOU LOST!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
+                    pygame.mixer.music.load("Sounds\You Lose Sound Effect.mp3")
+                    pygame.mixer.music.set_volume(40)
+                    pygame.mixer.music.play()
                     pygame.display.flip()
                     pygame.time.wait(2000)
                     pygame.quit()
