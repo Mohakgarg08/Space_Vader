@@ -323,6 +323,9 @@ def main():
             pygame.mixer.music.play()
             if player.lives==0:
                 draw_text("YOU LOST!", 64, RED, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+                pygame.mixer.music.load("Sounds\You Lose Sound Effect.mp3")
+                pygame.mixer.music.set_volume(60)
+                pygame.mixer.music.play()
                 pygame.display.flip()
                 pygame.time.wait(2000)
                 running= False
@@ -349,7 +352,10 @@ def main():
                 for bullet in bullets:
                     bullet.kill()
         if wave.wavelost:
-            draw_text("YOU LOST!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+            draw_text("YOU LOST!", 64, RED, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+            pygame.mixer.music.load("Sounds\You Lose Sound Effect.mp3")
+            pygame.mixer.music.set_volume(100)
+            pygame.mixer.music.play()
             pygame.display.flip()
             pygame.time.wait(2000)
             running= False
