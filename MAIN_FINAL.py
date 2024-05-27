@@ -80,7 +80,7 @@ def tv_off_effect():
     pygame.display.flip()
 
 def cinematic_intro():
-    draw_text("so it begins...", 36, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, center=True)
+    draw_text("So it begins...", 36, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, center=True)
     pygame.draw.rect(screen, BLACK, (0, 0, SCREEN_WIDTH, 50))
     pygame.draw.rect(screen, BLACK, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
     pygame.display.flip()
@@ -175,10 +175,10 @@ class Powerup(pygame.sprite.Sprite):
             self.kill()
 
 class ScoreText(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, enemy):
         super().__init__()
         self.font = pygame.font.Font(None, 24)
-        self.image = self.font.render("+1", True, WHITE)
+        self.image = self.font.render(f"+{enemy.points}", True, WHITE)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.alpha = 255
@@ -194,6 +194,7 @@ class ScoreText(pygame.sprite.Sprite):
 class EnemyWave:
     def __init__(self):
         self.enemies = []
+        self.shoottime=10
 
     def add_enemy(self, enemy):
         self.enemies.append(enemy)
@@ -203,7 +204,7 @@ class EnemyWave:
             self.enemies.remove(enemy)
 
     def update(self):
-        should_drop = False
+        self.shoottime-=1
         for enemy in self.enemies:
             enemy.update()
             if enemy.rect.bottom >= SCREEN_HEIGHT:
@@ -217,7 +218,12 @@ class EnemyWave:
                     pygame.time.wait(2000)
                     pygame.quit()
                     sys.exit()
-                enemy.kill()  
+                enemy.kill()
+                self.remove_enemy(enemy)
+        if self.shoottime==0:
+            shooter= self.enemies[random.randint(0,len(self.enemies)-1)]
+            self.shoottime=10
+            return Bullet(shooter.rect.centerx, shooter.rect.y, RED, BULLET_SPEED)
 
 player = Player()
 player_group = pygame.sprite.Group(player)
@@ -228,6 +234,7 @@ powerups = pygame.sprite.Group()
 score_texts = pygame.sprite.Group()
 enemy_wave = EnemyWave()
 logo = pygame.sprite.Group()
+enemybullets= pygame.sprite.Group()
 
 def create_enemies(wave_num):
     enemy_wave.enemies.clear()
@@ -256,12 +263,12 @@ def spawn_powerup():
 def main_menu():
     menu = True
     logo_image = pygame.transform.scale(logo_img, (400, 200))
-    logo_rect = logo_image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3))
+    logo_rect = logo_image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3-50))
     while menu:
         screen.fill(BLACK)
         screen.blit(background_img, (0, 0))
         screen.blit(logo_image, logo_rect)
-        draw_text("Press ENTER to Start", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
+        draw_text("Press ENTER to Start", 30, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2+30, center=True)
         draw_text("Press C for Controls", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.5, center=True)
         pygame.display.flip()
         for event in pygame.event.get():
@@ -319,23 +326,47 @@ def main():
         bullets.update()
         powerups.update()
         score_texts.update()
-        enemy_wave.update()
+        
 
         if pygame.time.get_ticks() - spawn_time > POWERUP_SPAWN_INTERVAL:
             spawn_powerup()
             spawn_time = pygame.time.get_ticks()
+        
+        bullet= enemy_wave.update()
+        if bullet != None:
+            all_sprites.add(bullet)
+            enemybullets.add(bullet)
+        bullets.update()
+        enemybullets.update()
+        score_texts.update()
 
         hits = pygame.sprite.groupcollide(bullets, enemies, True, True)
         for hit in hits.values():
             for enemy in hit:
                 player.score += enemy.points
-                score_text = ScoreText(enemy.rect.centerx, enemy.rect.centery)
+                score_text = ScoreText(enemy.rect.centerx, enemy.rect.centery,enemy)
                 all_sprites.add(score_text)
                 score_texts.add(score_text)
                 enemy_wave.remove_enemy(enemy)
                 pygame.mixer.music.load("Sounds/invaderkilled.wav")
                 pygame.mixer.music.set_volume(0.4)
                 pygame.mixer.music.play()
+
+        hits = pygame.sprite.groupcollide(enemybullets, player_group, True, False)
+        if hits:
+            player.lives-=1 
+            player
+            pygame.mixer.music.load("Sounds/explosion.wav")
+            pygame.mixer.music.set_volume(40)
+            pygame.mixer.music.play()
+            if player.lives==0:
+                draw_text("YOU LOST!", 64, RED, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+                pygame.mixer.music.load("Sounds\You Lose Sound Effect.mp3")
+                pygame.mixer.music.set_volume(60)
+                pygame.mixer.music.play()
+                pygame.display.flip()
+                pygame.time.wait(2000)
+                running= False
 
         if not enemies:
             draw_text("WAVE COMPLETE!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
@@ -355,9 +386,9 @@ def main():
         screen.fill(BLACK)
         screen.blit(background_img, (0, 0))
         all_sprites.draw(screen)
-        draw_text(f"Score: {player.score}", 18, WHITE, SCREEN_WIDTH // 2, 10)
-        draw_text(f"Lives: {player.lives}", 18, WHITE, SCREEN_WIDTH - 60, 10)
-        draw_text(f"Wave: {wave_num}", 18, WHITE, 10, 10)
+        draw_text(f"Score: {player.score}", 24, WHITE, SCREEN_WIDTH // 2, 10)
+        draw_text(f"Lives: {player.lives}", 24, WHITE, SCREEN_WIDTH - 60, 10)
+        draw_text(f"Wave: {wave_num}", 24, WHITE, 40, 10)
         pygame.display.flip()
 
     pygame.quit()
