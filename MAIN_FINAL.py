@@ -87,7 +87,7 @@ def cinematic_intro():
     pygame.display.flip()
     pygame.time.wait(1000)
     pygame.mixer.Sound.play(hyperdrive_sound)
-    pygame.mixer.music.set_volume(50)
+    pygame.mixer.music.set_volume(0.1)
     pygame.time.wait(2000)
     screen.fill(BLACK)
     pygame.display.flip()
