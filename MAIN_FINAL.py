@@ -17,8 +17,8 @@ MAX_BULLETS = 3
 MAX_WINS = 3
 WAVE_1_ENEMIES = 30
 WAVE_2_ENEMIES = 40
-ENEMY_SLOWDOWN_DISTANCE = 50  
-CUTSCENE_ENEMIES = 10  
+ENEMY_SLOWDOWN_DISTANCE = 25 
+CUTSCENE_ENEMIES = 7  
 
 
 WHITE = (255, 255, 255)
@@ -36,6 +36,7 @@ player_img = pygame.image.load('Images/invaders.png').convert_alpha()
 enemy_img = pygame.image.load('Images/EnemyShip.png').convert_alpha()
 bullet_img = pygame.image.load('Images/bullett.png').convert_alpha()
 powerup_img = pygame.image.load('Images/Powerup.png').convert_alpha()
+enemy_bullet = pygame.image.load('Images/EnemyBullet').convert_alpha()
 background_img = pygame.image.load('Images/StarBackground.png').convert_alpha()
 logo_img = pygame.image.load('Images\Logo1.png').convert_alpha()
 hyperdrive_sound = pygame.mixer.Sound('Sounds/HyperDrive.mp3')
@@ -224,7 +225,7 @@ class EnemyWave:
         if self.shoottime==0:
             shooter= self.enemies[random.randint(0,len(self.enemies)-1)]
             self.shoottime=10
-            return Bullet(shooter.rect.centerx, shooter.rect.y, enemy_img, BULLET_SPEED)
+            return Bullet(shooter.rect.centerx, shooter.rect.y, enemy_bullet, BULLET_SPEED)
 
 player = Player()
 player_group = pygame.sprite.Group(player)
