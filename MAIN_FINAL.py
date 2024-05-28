@@ -44,6 +44,7 @@ background_music = pygame.mixer.Sound('Sounds/SpaceInvadersmusic.wav')
 lose_sound=pygame.mixer.Sound('Sounds\You Lose Sound Effect.mp3')
 
 
+
 def draw_text(text, size, color, x, y, font_name=None, center=False):
     font = pygame.font.Font(font_name, size)
     text_surface = font.render(text, True, color)
@@ -87,7 +88,7 @@ def cinematic_intro():
     pygame.display.flip()
     pygame.time.wait(1000)
     pygame.mixer.Sound.play(hyperdrive_sound)
-    pygame.mixer.music.set_volume(0.1)
+    pygame.mixer.music.set_volume(0.2)
     pygame.time.wait(2000)
     screen.fill(BLACK)
     pygame.display.flip()
@@ -284,6 +285,8 @@ def main_menu():
                     tv_off_effect()
                     cinematic_intro()
                     hyperdrive_effect()
+                    pygame.mixer.Sound.play(background_music)
+                    pygame.mixer.music.set_volume(0.5)
                 if event.key == pygame.K_c:
                     show_controls()
 
@@ -310,7 +313,6 @@ def main():
     spawn_time = pygame.time.get_ticks()
     wave_num = 1
     create_enemies(wave_num)
-
     while running:
         clock.tick(60)
         keys = pygame.key.get_pressed()
@@ -334,7 +336,7 @@ def main():
         if pygame.time.get_ticks() - spawn_time > POWERUP_SPAWN_INTERVAL:
             spawn_powerup()
             spawn_time = pygame.time.get_ticks()
-        
+
         bullet= enemy_wave.update()
         if bullet != None:
             all_sprites.add(bullet)
