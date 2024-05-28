@@ -214,7 +214,7 @@ class EnemyWave:
             if enemy.rect.bottom >= SCREEN_HEIGHT:
                 player.score -= 10
                 if player.score < 0:  
-                    draw_text("YOU LOST!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
+                    draw_text("YOU LOST!", 64, RED, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
                     pygame.mixer.music.load("Sounds/You Lose Sound Effect.mp3")
                     pygame.mixer.music.set_volume(40)
                     pygame.mixer.music.play()
