@@ -32,7 +32,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Space Vaders")
 
 
-player_img = pygame.image.load('Images/invaders.png').convert_alpha()
+player_img = pygame.image.load('Images\Invader1.png').convert_alpha()
 enemy_img = pygame.image.load('Images/EnemyShip.png').convert_alpha()
 bullet_img = pygame.image.load('Images/bullett.png').convert_alpha()
 powerup_img = pygame.image.load('Images/Powerup.png').convert_alpha()
@@ -97,7 +97,7 @@ def cinematic_intro():
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.transform.scale(player_img, (50, 30))
+        self.image = pygame.transform.scale(player_img, (80, 60))
         self.rect = self.image.get_rect()
         self.rect.centerx = SCREEN_WIDTH // 2
         self.rect.bottom = SCREEN_HEIGHT - 10
