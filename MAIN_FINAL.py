@@ -82,7 +82,7 @@ def tv_off_effect():
     pygame.display.flip()
 
 def cinematic_intro():
-    draw_text("So it begins...", 44, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, center=True)
+    draw_text("So it begins...", 44, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 , center=True)
     pygame.draw.rect(screen, BLACK, (0, 0, SCREEN_WIDTH, 50))
     pygame.draw.rect(screen, BLACK, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
     pygame.display.flip()
@@ -92,7 +92,7 @@ def cinematic_intro():
     pygame.time.wait(2000)
     screen.fill(BLACK)
     pygame.display.flip()
-#36
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
