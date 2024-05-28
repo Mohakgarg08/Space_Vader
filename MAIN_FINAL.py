@@ -17,6 +17,7 @@ MAX_BULLETS = 3
 MAX_WINS = 3
 WAVE_1_ENEMIES = 30
 WAVE_2_ENEMIES = 40
+FINAL_WAVE= 15
 ENEMY_SLOWDOWN_DISTANCE = 25 
 CUTSCENE_ENEMIES = 7  
 
@@ -39,6 +40,7 @@ powerup_img = pygame.image.load('Images/Powerup.png').convert_alpha()
 enemy_bullet = pygame.image.load('Images/EnemyBullet.png').convert_alpha()
 background_img = pygame.image.load('Images/StarBackground.png').convert_alpha()
 logo_img = pygame.image.load('Images\Logo1.png').convert_alpha()
+Finalboss_img=pygame.image.load('Images\FinalBoss.png').convert_alpha()
 hyperdrive_sound = pygame.mixer.Sound('Sounds/HyperDrive.mp3')
 background_music = pygame.mixer.Sound('Sounds/SpaceInvadersmusic.mp3')
 lose_sound=pygame.mixer.Sound('Sounds\You Lose Sound Effect.mp3')
@@ -102,7 +104,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = SCREEN_WIDTH // 2
         self.rect.bottom = SCREEN_HEIGHT - 10
         self.speed = PLAYER_SPEED
-        self.lives = 3
+        self.lives = 100
         self.score = 0
         self.wins = 0
         self.powered_up = False
@@ -149,6 +151,19 @@ class Enemy(pygame.sprite.Sprite):
             self.rect.y += 5
         else:
             self.rect.y += self.speed
+
+class Finalboss(Enemy):
+    def __init__(self):
+        super().__init__(250,-50,(50,80),15,fast=True)
+        self.image = pygame.transform.scale(Finalboss_img,(50,40))
+        x= self.rect.x 
+        y= self.rect.y 
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.points=15
+        self.bosshits=0
+    
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, img, speed):
@@ -239,10 +254,19 @@ score_texts = pygame.sprite.Group()
 enemy_wave = EnemyWave()
 logo = pygame.sprite.Group()
 enemybullets= pygame.sprite.Group()
+final_boss=pygame.sprite.Group(Finalboss())
+final=False
+
 
 def create_enemies(wave_num):
     enemy_wave.enemies.clear()
-    num_enemies = WAVE_1_ENEMIES if wave_num == 1 else WAVE_2_ENEMIES
+    num_enemies = WAVE_1_ENEMIES 
+    if wave_num == 1:
+        num_enemies = WAVE_1_ENEMIES
+    elif wave_num == 2:
+        num_enemies=WAVE_2_ENEMIES
+    else:
+        num_enemies=FINAL_WAVE
     positions = set()
     for i in range(num_enemies):
         size = random.choice([(50, 30), (75, 45), (125, 75)])
@@ -311,7 +335,7 @@ def main():
     running = True
     clock = pygame.time.Clock()
     spawn_time = pygame.time.get_ticks()
-    wave_num = 1
+    wave_num = 3
     create_enemies(wave_num)
     while running:
         clock.tick(60)
@@ -373,12 +397,37 @@ def main():
                 pygame.time.wait(2000)
                 running= False
 
+        hits = pygame.sprite.groupcollide(bullets, enemies, True, True)
+        for hit in hits.values():
+            if not final:
+                for enemy in hit:
+                    player.score += enemy.points
+                    score_text = ScoreText(enemy.rect.centerx, enemy.rect.centery,enemy)
+                    all_sprites.add(score_text)
+                    score_texts.add(score_text)
+                    enemy_wave.remove_enemy(enemy)
+                    pygame.mixer.music.load("Sounds/invaderkilled.wav")
+                    pygame.mixer.music.set_volume(1)
+                    pygame.mixer.music.play()
+                
+            else:
+                enemy_wave.enemies[0].bosshits+=1
+                if enemy_wave.enemies[0].bosshits==15:
+                    enemies[0].remove_enemy(enemy_wave)
+                
+        if not enemies and wave_num== 3 and not final:
+            finalboss=Finalboss()
+            enemy_wave.add_enemy(finalboss)
+            enemies.add(finalboss)
+            final=True
+
+
         if not enemies:
             draw_text("WAVE COMPLETE!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
             pygame.display.flip()
             pygame.time.wait(2000)
             wave_num += 1
-            if wave_num > 2:
+            if wave_num > 3:
                 draw_text("YOU WIN!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
                 pygame.display.flip()
                 pygame.time.wait(2000)
