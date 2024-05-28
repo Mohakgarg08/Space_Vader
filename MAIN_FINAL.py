@@ -29,7 +29,7 @@ BLUE = (0, 0, 255)
 
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Space Invaders")
+pygame.display.set_caption("Space Vaders")
 
 
 player_img = pygame.image.load('Images/invaders.png').convert_alpha()
@@ -82,7 +82,7 @@ def tv_off_effect():
     pygame.display.flip()
 
 def cinematic_intro():
-    draw_text("So it begins...", 36, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, center=True)
+    draw_text("So it begins...", 44, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, center=True)
     pygame.draw.rect(screen, BLACK, (0, 0, SCREEN_WIDTH, 50))
     pygame.draw.rect(screen, BLACK, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
     pygame.display.flip()
@@ -92,7 +92,7 @@ def cinematic_intro():
     pygame.time.wait(2000)
     screen.fill(BLACK)
     pygame.display.flip()
-
+#36
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -354,7 +354,7 @@ def main():
                 score_texts.add(score_text)
                 enemy_wave.remove_enemy(enemy)
                 pygame.mixer.music.load("Sounds/invaderkilled.wav")
-                pygame.mixer.music.set_volume(0.5)
+                pygame.mixer.music.set_volume(1)
                 pygame.mixer.music.play()
 
         hits = pygame.sprite.groupcollide(enemybullets, player_group, True, False)
@@ -362,7 +362,7 @@ def main():
             player.lives-=1 
             player
             pygame.mixer.music.load("Sounds/explosion.wav")
-            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.set_volume(1)
             pygame.mixer.music.play()
             if player.lives==0:
                 draw_text("YOU LOST!", 64, RED, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
