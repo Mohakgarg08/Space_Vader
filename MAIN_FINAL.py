@@ -85,6 +85,7 @@ def cinematic_intro():
     pygame.draw.rect(screen, BLACK, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
     pygame.display.flip()
     pygame.mixer.Sound.play(hyperdrive_sound)
+    pygame.mixer.music.set_volume(40)
     pygame.time.wait(2000)
     screen.fill(BLACK)
     pygame.display.flip()
@@ -319,7 +320,7 @@ def main():
                 if event.key == pygame.K_SPACE and len(bullets) < MAX_BULLETS:
                     player.shoot()
                     pygame.mixer.music.load("Sounds/shoot.wav")
-                    pygame.mixer.music.set_volume(0.4)
+                    pygame.mixer.music.set_volume(0.1)
                     pygame.mixer.music.play()
 
         player.update(keys)
@@ -349,7 +350,7 @@ def main():
                 score_texts.add(score_text)
                 enemy_wave.remove_enemy(enemy)
                 pygame.mixer.music.load("Sounds/invaderkilled.wav")
-                pygame.mixer.music.set_volume(0.4)
+                pygame.mixer.music.set_volume(0.1)
                 pygame.mixer.music.play()
 
         hits = pygame.sprite.groupcollide(enemybullets, player_group, True, False)
@@ -357,12 +358,12 @@ def main():
             player.lives-=1 
             player
             pygame.mixer.music.load("Sounds/explosion.wav")
-            pygame.mixer.music.set_volume(40)
+            pygame.mixer.music.set_volume(0.1)
             pygame.mixer.music.play()
             if player.lives==0:
                 draw_text("YOU LOST!", 64, RED, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
                 pygame.mixer.music.load("Sounds\You Lose Sound Effect.mp3")
-                pygame.mixer.music.set_volume(60)
+                pygame.mixer.music.set_volume(20)
                 pygame.mixer.music.play()
                 pygame.display.flip()
                 pygame.time.wait(2000)
