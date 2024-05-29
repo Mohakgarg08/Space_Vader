@@ -104,10 +104,10 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = SCREEN_WIDTH // 2
         self.rect.bottom = SCREEN_HEIGHT - 10
         self.speed = PLAYER_SPEED
-        self.lives = 3
+        self.lives = 100
         self.score = 0
         self.wins = 0
-        self.powered_up = False
+        self.powered_up = False 
         self.powerup_time = 0
 
     def update(self, keys):
@@ -254,8 +254,9 @@ score_texts = pygame.sprite.Group()
 enemy_wave = EnemyWave()
 logo = pygame.sprite.Group()
 enemybullets= pygame.sprite.Group()
-final_boss=pygame.sprite.Group(Finalboss())
-final=False
+finalBoss=Finalboss()
+final_boss=pygame.sprite.Group(finalBoss)
+
 
 
 def create_enemies(wave_num):
@@ -310,7 +311,7 @@ def main_menu():
                     cinematic_intro()
                     hyperdrive_effect()
                     pygame.mixer.Sound.play(background_music)
-                    pygame.mixer.music.set_volume(0.7)
+                    pygame.mixer.music.set_volume(0.9)
                 if event.key == pygame.K_c:
                     show_controls()
 
@@ -332,10 +333,11 @@ def show_controls():
                     controls = False
 
 def main():
+    final=False
     running = True
     clock = pygame.time.Clock()
     spawn_time = pygame.time.get_ticks()
-    wave_num = 1
+    wave_num = 3
     create_enemies(wave_num)
     while running:
         clock.tick(60)
