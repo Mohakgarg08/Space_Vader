@@ -7,12 +7,12 @@ pygame.init()
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-# settings man
+# settings man - Kabir
 PLAYER_SPEED = 5
 ENEMY_SPEED = 1
 BULLET_SPEED = 7
 ENEMY_DROP = 30
-POWERUP_SPAWN_INTERVAL = 5000  # milliseconds
+POWERUP_SPAWN_INTERVAL = 5000  # this is in milliseconds if you want to change it - Kabir
 MAX_BULLETS = 3
 MAX_WINS = 3
 WAVE_1_ENEMIES = 30
@@ -45,6 +45,8 @@ hyperdrive_sound = pygame.mixer.Sound('Sounds/HyperDrive.mp3')
 background_music = pygame.mixer.Sound('Sounds/SpaceInvadersmusic.mp3')
 lose_sound=pygame.mixer.Sound('Sounds\You Lose Sound Effect.mp3')
 
+# this entire block basically is just making the script modular in compared to the previous ones but I put them 
+
 
 
 def draw_text(text, size, color, x, y, font_name=None, center=False):
@@ -67,6 +69,7 @@ def hyperdrive_effect():
         pygame.time.wait(50)
     for enemy in enemies:
         enemy.speed = ENEMY_SPEED
+# this script basically smoothly gets the enemies in, but only for some.. It can change but I like it as an intro at first.
 
 def tv_off_effect():
     for i in range(10, 0, -1):
@@ -76,24 +79,27 @@ def tv_off_effect():
         pygame.time.wait(100)
     screen.fill(BLACK)
     pygame.display.flip()
-    pygame.time.wait(500)
+    pygame.time.wait(700)
     draw_text("GO!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
     pygame.display.flip()
     pygame.time.wait(1000)
     screen.fill(BLACK)
     pygame.display.flip()
+# I couldn't think of a better name.. - Kabir
 
 def cinematic_intro():
     draw_text("So it begins...", 44, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 , center=True)
     pygame.draw.rect(screen, BLACK, (0, 0, SCREEN_WIDTH, 50))
     pygame.draw.rect(screen, BLACK, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
     pygame.display.flip()
-    pygame.time.wait(1000)
+    pygame.time.wait(1500)
     pygame.mixer.Sound.play(hyperdrive_sound)
     pygame.mixer.music.set_volume(0.01)
     pygame.time.wait(2000)
     screen.fill(BLACK)
     pygame.display.flip()
+    
+    # this just makes the game feel more ominous. - Kabir
 
 
 class Player(pygame.sprite.Sprite):
@@ -109,6 +115,8 @@ class Player(pygame.sprite.Sprite):
         self.wins = 0
         self.powered_up = False 
         self.powerup_time = 0
+        
+        # this is the players body, not that serious
 
     def update(self, keys):
         if keys[pygame.K_LEFT] and self.rect.left > 0:
@@ -202,6 +210,8 @@ class ScoreText(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         self.alpha = 255
 
+# these points dynamically adjust depending on the enemies size, so larger ones give 7
+
     def update(self):
         self.alpha -= 5
         if self.alpha <= 0:
@@ -243,6 +253,8 @@ class EnemyWave:
             shooter= self.enemies[random.randint(0,len(self.enemies)-1)]
             self.shoottime=10
             return Bullet(shooter.rect.centerx, shooter.rect.y, enemy_bullet, BULLET_SPEED)
+        
+        # if you get head you = dead (if hit 3 times) - Kabir
 
 player = Player()
 player_group = pygame.sprite.Group(player)
@@ -267,7 +279,7 @@ def create_enemies(wave_num):
     elif wave_num == 2:
         num_enemies=WAVE_2_ENEMIES
     else:
-        num_enemies=FINAL_WAVE
+        num_enemies=FINAL_WAVE # self expanatory - Kabir
     positions = set()
     for i in range(num_enemies):
         size = random.choice([(50, 30), (75, 45), (125, 75)])
@@ -331,6 +343,8 @@ def show_controls():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     controls = False
+                    
+# this is from the main menu and then in if you click 'C' it'll open up the controls, and it literally just does this.. 
 
 def main():
     final=False
@@ -398,6 +412,7 @@ def main():
                 pygame.display.flip()
                 pygame.time.wait(2000)
                 running= False
+        # another you getting hit (3 times) = dead
 
         hits = pygame.sprite.groupcollide(bullets, enemies, True, True)
         for hit in hits.values():
@@ -434,6 +449,7 @@ def main():
                 pygame.display.flip()
                 pygame.time.wait(2000)
                 running = False
+                # if you're the goat then you'll get this.
             else:
                 create_enemies(wave_num)
                 for bullet in bullets:
@@ -453,3 +469,5 @@ def main():
 if __name__ == "__main__":
     main_menu()
     main()
+    
+    # all in all everything here is kinda self explanatory, if you need any specifics, just message me - Kabir
