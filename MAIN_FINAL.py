@@ -82,7 +82,7 @@ def tv_off_effect():
     pygame.time.wait(700)
     draw_text("GO!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
     pygame.display.flip()
-    pygame.time.wait(1000)
+    pygame.time.wait(2100)
     screen.fill(BLACK)
     pygame.display.flip()
 # I couldn't think of a better name.. - Kabir
@@ -110,7 +110,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = SCREEN_WIDTH // 2
         self.rect.bottom = SCREEN_HEIGHT - 10
         self.speed = PLAYER_SPEED
-        self.lives = 100
+        self.lives = 20
         self.score = 0
         self.wins = 0
         self.powered_up = False 
@@ -151,6 +151,8 @@ class Enemy(pygame.sprite.Sprite):
         self.speed = ENEMY_SPEED
         self.points = points
         self.fast = fast
+        
+        # this basically just creates the enemies varying from sizes, so it doesnt look to repetetive.
 
     def update(self):
         if self.fast and self.rect.y > ENEMY_SLOWDOWN_DISTANCE:
@@ -171,6 +173,8 @@ class Finalboss(Enemy):
         self.rect.y = y
         self.points=15
         self.bosshits=0
+        
+        # the final boss
     
 
 class Bullet(pygame.sprite.Sprite):
@@ -194,6 +198,8 @@ class Powerup(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        
+        # a custom mario image for the powerups which basically creates them, in a restricted area so it isnt to large.
 
     def update(self):
         if pygame.sprite.collide_rect(self, player):
@@ -300,6 +306,8 @@ def spawn_powerup():
     powerup = Powerup(x, y)
     all_sprites.add(powerup)
     powerups.add(powerup)
+    
+    # this is the part that restricts where it grows.
 
 def main_menu():
     menu = True
@@ -326,6 +334,8 @@ def main_menu():
                     pygame.mixer.music.set_volume(0.9)
                 if event.key == pygame.K_c:
                     show_controls()
+                    
+# this runs the different options in where you can decide if you want to play the game or go to the controls, simple main menu not that deep
 
 def show_controls():
     controls = True
@@ -376,7 +386,7 @@ def main():
         if pygame.time.get_ticks() - spawn_time > POWERUP_SPAWN_INTERVAL:
             spawn_powerup()
             spawn_time = pygame.time.get_ticks()
-
+# this is the interval in where you can decide (above) how often powerups spawn
         bullet= enemy_wave.update()
         if bullet != None:
             all_sprites.add(bullet)
@@ -396,6 +406,7 @@ def main():
                 pygame.mixer.music.load("Sounds/invaderkilled.wav")
                 pygame.mixer.music.set_volume(1)
                 pygame.mixer.music.play()
+# if you collide your bullets into it, it'll make the sould, "invader killed" but this script just handles this.
 
         hits = pygame.sprite.groupcollide(enemybullets, player_group, True, False)
         if hits:
