@@ -337,7 +337,7 @@ def main():
     running = True
     clock = pygame.time.Clock()
     spawn_time = pygame.time.get_ticks()
-    wave_num = 3
+    wave_num = 1
     create_enemies(wave_num)
     while running:
         clock.tick(60)
