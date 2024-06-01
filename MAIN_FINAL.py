@@ -7,12 +7,12 @@ pygame.init()
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-# settings man - Kabir
+# settings
 PLAYER_SPEED = 5
 ENEMY_SPEED = 1
 BULLET_SPEED = 7
 ENEMY_DROP = 30
-POWERUP_SPAWN_INTERVAL = 5000  # this is in milliseconds if you want to change it - Kabir
+POWERUP_SPAWN_INTERVAL = 5000  # this is in milliseconds if you want to change it 
 MAX_BULLETS = 3
 MAX_WINS = 3
 WAVE_1_ENEMIES = 30
@@ -45,7 +45,7 @@ hyperdrive_sound = pygame.mixer.Sound('Sounds/HyperDrive.mp3')
 background_music = pygame.mixer.Sound('Sounds/SpaceInvadersmusic.mp3')
 lose_sound=pygame.mixer.Sound('Sounds\You Lose Sound Effect.mp3')
 
-# this entire block basically is just making the script modular in compared to the previous ones but I put them 
+# this entire block basically is just making the script modular in compared to the previous ones
 
 
 
@@ -99,7 +99,7 @@ def cinematic_intro():
     screen.fill(BLACK)
     pygame.display.flip()
     
-    # this just makes the game feel more ominous. - Kabir
+    # this just makes the game feel more ominous.
 
 
 class Player(pygame.sprite.Sprite):
@@ -165,7 +165,7 @@ class Enemy(pygame.sprite.Sprite):
 class Finalboss(Enemy):
     def __init__(self):
         super().__init__(250,-50,(50,80),15,fast=True)
-        self.image = pygame.transform.scale(Finalboss_img,(50,40))
+        self.image = pygame.transform.scale(Finalboss_img,(200,190))
         x= self.rect.x 
         y= self.rect.y 
         self.rect = self.image.get_rect()
@@ -355,18 +355,18 @@ def show_controls():
                     controls = False
                     
 # this is from the main menu and then in if you click 'C' it'll open up the controls, and it literally just does this.. 
-
+final=False
 def main():
-    final=False
+    global final
+    
     running = True
     clock = pygame.time.Clock()
     spawn_time = pygame.time.get_ticks()
-    wave_num = 1
+    wave_num = 3
     create_enemies(wave_num)
     while running:
         clock.tick(60)
         keys = pygame.key.get_pressed()
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -424,30 +424,45 @@ def main():
                 pygame.time.wait(2000)
                 running= False
         # another you getting hit (3 times) = dead
+        if not final:
+            hits = pygame.sprite.groupcollide(bullets, enemies, True, True)
+            for hit in hits.values():
+                    for enemy in hit:
+                        player.score += enemy.points
+                        score_text = ScoreText(enemy.rect.centerx, enemy.rect.centery,enemy)
+                        all_sprites.add(score_text)
+                        score_texts.add(score_text)
+                        enemy_wave.remove_enemy(enemy)
+                        pygame.mixer.music.load("Sounds/invaderkilled.wav")
+                        pygame.mixer.music.set_volume(1)
+                        pygame.mixer.music.play()
 
-        hits = pygame.sprite.groupcollide(bullets, enemies, True, True)
-        for hit in hits.values():
-            if not final:
-                for enemy in hit:
-                    player.score += enemy.points
-                    score_text = ScoreText(enemy.rect.centerx, enemy.rect.centery,enemy)
-                    all_sprites.add(score_text)
-                    score_texts.add(score_text)
-                    enemy_wave.remove_enemy(enemy)
-                    pygame.mixer.music.load("Sounds/invaderkilled.wav")
-                    pygame.mixer.music.set_volume(1)
-                    pygame.mixer.music.play()
-                
-            else:
-                enemy_wave.enemies[0].bosshits+=1
-                if enemy_wave.enemies[0].bosshits==15:
-                    enemies[0].remove_enemy(enemy_wave)
-                
-        if not enemies and wave_num== 3 and not final:
-            finalboss=Finalboss()
-            enemy_wave.add_enemy(finalboss)
-            enemies.add(finalboss)
-            final=True
+            if not enemies and wave_num== 3:
+                enemy_wave.add_enemy(finalBoss)
+                enemies.add(finalBoss)
+                all_sprites.add(finalBoss)
+                final=True
+
+        else:
+            #print("in final")
+            hits = pygame.sprite.groupcollide(bullets, enemies,True,False)
+            if hits:
+                print("in final")
+                finalBoss.bosshits+=1
+                print("boss hits")
+                if finalBoss.bosshits==15:
+                    enemy_wave.remove_enemy(finalBoss)
+                    enemies.remove(finalBoss)
+                           
+           # for hit in hits.values():
+            #    print("in final")
+            #    for enemy in hit:
+            #        finalBoss.bosshits+=1
+            #        print("boss hits")
+            #        if finalBoss.bosshits==15:
+              #          enemy_wave.remove_enemy(finalBoss)
+              #          enemies.remove(finalBoss)
+                        
 
 
         if not enemies:
