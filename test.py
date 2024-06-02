@@ -7,19 +7,21 @@ pygame.init()
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-# settings man - Kabir
+# settings
 PLAYER_SPEED = 5
 ENEMY_SPEED = 1
 BULLET_SPEED = 7
 ENEMY_DROP = 30
-POWERUP_SPAWN_INTERVAL = 5000  # this is in milliseconds if you want to change it - Kabir
+POWERUP_SPAWN_INTERVAL = 5000  # this is in milliseconds if you want to change it
 MAX_BULLETS = 3
 MAX_WINS = 3
 WAVE_1_ENEMIES = 30
 WAVE_2_ENEMIES = 40
 FINAL_WAVE = 15
-ENEMY_SLOWDOWN_DISTANCE = 25 
-CUTSCENE_ENEMIES = 7  
+ENEMY_SLOWDOWN_DISTANCE = 25
+CUTSCENE_ENEMIES = 7
+SHIELD_HEALTH = 35
+FINAL_BOSS_HEALTH = 1500  # Variable to experiment with final boss health
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -40,7 +42,9 @@ logo_img = pygame.image.load('Images/Logo1.png').convert_alpha()
 Finalboss_img = pygame.image.load('Images/FinalBoss.png').convert_alpha()
 hyperdrive_sound = pygame.mixer.Sound('Sounds/HyperDrive.mp3')
 background_music = pygame.mixer.Sound('Sounds/SpaceInvadersmusic.mp3')
+finalboss_music = pygame.mixer.Sound('Sounds/finalbossmusic.mp3')
 lose_sound = pygame.mixer.Sound('Sounds/You Lose Sound Effect.mp3')
+explosion_sound = pygame.mixer.Sound('Sounds/Explosion.mp3')  # Placeholder for explosion sound
 
 def draw_text(text, size, color, x, y, font_name=None, center=False):
     font = pygame.font.Font(font_name, size)
@@ -79,7 +83,7 @@ def tv_off_effect():
     pygame.display.flip()
 
 def cinematic_intro():
-    draw_text("So it begins...", 44, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
+    draw_text("So it begins...", 44, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 , center=True)
     pygame.draw.rect(screen, BLACK, (0, 0, SCREEN_WIDTH, 50))
     pygame.draw.rect(screen, BLACK, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
     pygame.display.flip()
@@ -89,6 +93,19 @@ def cinematic_intro():
     pygame.time.wait(2000)
     screen.fill(BLACK)
     pygame.display.flip()
+
+def boss_cinematic_entry():
+    for i in range(10):
+        screen.fill(BLACK)
+        pygame.draw.rect(screen, BLACK, (0, 0, SCREEN_WIDTH, 50))
+        pygame.draw.rect(screen, BLACK, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
+        draw_text("I have found you.", 44, RED, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
+        pygame.display.flip()
+        pygame.time.wait(300)
+    pygame.time.wait(2000)
+    draw_text("You now have shields when you get power-ups, press F to save yourself.", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.5, center=True)
+    pygame.display.flip()
+    pygame.time.wait(3000)
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -101,8 +118,10 @@ class Player(pygame.sprite.Sprite):
         self.lives = 20
         self.score = 0
         self.wins = 0
-        self.powered_up = False 
+        self.powered_up = False
         self.powerup_time = 0
+        self.shielded = False
+        self.shield_health = SHIELD_HEALTH
 
     def update(self, keys):
         if keys[pygame.K_LEFT] and self.rect.left > 0:
@@ -115,6 +134,8 @@ class Player(pygame.sprite.Sprite):
             self.rect.y += self.speed
         if self.powered_up and pygame.time.get_ticks() > self.powerup_time:
             self.powered_up = False
+        if keys[pygame.K_f] and self.shielded:
+            self.activate_shield()
 
     def shoot(self):
         if self.powered_up:
@@ -126,6 +147,17 @@ class Player(pygame.sprite.Sprite):
             bullet = Bullet(self.rect.centerx, self.rect.top, bullet_img, -BULLET_SPEED)
             all_sprites.add(bullet)
             bullets.add(bullet)
+
+    def activate_shield(self):
+        self.shielded = True
+
+    def deactivate_shield(self):
+        self.shielded = False
+
+    def draw_shield(self):
+        if self.shielded:
+            pygame.draw.ellipse(screen, BLUE, self.rect.inflate(30, 30), 2)
+            draw_text(f"Shield: {self.shield_health}", 18, WHITE, self.rect.centerx, self.rect.top - 20)
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, size, points, fast=True):
@@ -148,19 +180,25 @@ class Enemy(pygame.sprite.Sprite):
 
 class Finalboss(Enemy):
     def __init__(self):
-        super().__init__(250, -50, (50, 80), 15, fast=True)
-        self.image = pygame.transform.scale(Finalboss_img, (50, 40))
+        super().__init__(250,-50,(50,80),15,fast=True)
+        self.image = pygame.transform.scale(Finalboss_img,(200,190))
+        x= self.rect.x
+        y= self.rect.y
         self.rect = self.image.get_rect()
-        self.points = 15
-        self.bosshits = 0
+        self.rect.x = x
+        self.rect.y = y
+        self.points=15
+        self.bosshits=0
+        self.health = FINAL_BOSS_HEALTH
 
-    def update(self):
-        if self.fast and self.rect.y > ENEMY_SLOWDOWN_DISTANCE:
-            self.fast = False
-        if self.fast:
-            self.rect.y += 5
-        else:
-            self.rect.y += self.speed
+    def draw_health_bar(self):
+        bar_length = 100
+        bar_height = 10
+        fill = (self.health / FINAL_BOSS_HEALTH) * bar_length
+        outline_rect = pygame.Rect(self.rect.x, self.rect.y - 20, bar_length, bar_height)
+        fill_rect = pygame.Rect(self.rect.x, self.rect.y - 20, fill, bar_height)
+        pygame.draw.rect(screen, RED, fill_rect)
+        pygame.draw.rect(screen, WHITE, outline_rect, 2)
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, img, speed):
@@ -188,6 +226,7 @@ class Powerup(pygame.sprite.Sprite):
         if pygame.sprite.collide_rect(self, player):
             player.powered_up = True
             player.powerup_time = pygame.time.get_ticks() + 5000
+            player.shielded = True
             self.kill()
 
 class ScoreText(pygame.sprite.Sprite):
@@ -210,7 +249,7 @@ class ScoreText(pygame.sprite.Sprite):
 class EnemyWave:
     def __init__(self):
         self.enemies = []
-        self.shoottime = 10
+        self.shoottime=10
 
     def add_enemy(self, enemy):
         self.enemies.append(enemy)
@@ -220,12 +259,12 @@ class EnemyWave:
             self.enemies.remove(enemy)
 
     def update(self):
-        self.shoottime -= 1
+        self.shoottime-=1
         for enemy in self.enemies:
             enemy.update()
             if enemy.rect.bottom >= SCREEN_HEIGHT:
                 player.score -= 10
-                if player.score < 0:  
+                if player.score < 0:
                     draw_text("YOU LOST!", 64, RED, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
                     pygame.mixer.music.load("Sounds/You Lose Sound Effect.mp3")
                     pygame.mixer.music.set_volume(40)
@@ -236,9 +275,9 @@ class EnemyWave:
                     sys.exit()
                 enemy.kill()
                 self.remove_enemy(enemy)
-        if self.shoottime == 0:
-            shooter = self.enemies[random.randint(0, len(self.enemies) - 1)]
-            self.shoottime = 10
+        if self.shoottime==0:
+            shooter= self.enemies[random.randint(0,len(self.enemies)-1)]
+            self.shoottime=10
             return Bullet(shooter.rect.centerx, shooter.rect.y, enemy_bullet, BULLET_SPEED)
 
 player = Player()
@@ -250,19 +289,19 @@ powerups = pygame.sprite.Group()
 score_texts = pygame.sprite.Group()
 enemy_wave = EnemyWave()
 logo = pygame.sprite.Group()
-enemybullets = pygame.sprite.Group()
-finalBoss = Finalboss()
-final_boss = pygame.sprite.Group(finalBoss)
+enemybullets= pygame.sprite.Group()
+finalBoss=Finalboss()
+final_boss=pygame.sprite.Group(finalBoss)
 
 def create_enemies(wave_num):
     enemy_wave.enemies.clear()
-    num_enemies = WAVE_1_ENEMIES 
+    num_enemies = WAVE_1_ENEMIES
     if wave_num == 1:
         num_enemies = WAVE_1_ENEMIES
     elif wave_num == 2:
-        num_enemies = WAVE_2_ENEMIES
+        num_enemies=WAVE_2_ENEMIES
     else:
-        num_enemies = FINAL_WAVE
+        num_enemies=FINAL_WAVE # self expanatory - Kabir
     positions = set()
     for i in range(num_enemies):
         size = random.choice([(50, 30), (75, 45), (125, 75)])
@@ -287,12 +326,12 @@ def spawn_powerup():
 def main_menu():
     menu = True
     logo_image = pygame.transform.scale(logo_img, (400, 200))
-    logo_rect = logo_image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3 - 50))
+    logo_rect = logo_image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3-50))
     while menu:
         screen.fill(BLACK)
         screen.blit(background_img, (0, 0))
         screen.blit(logo_image, logo_rect)
-        draw_text("Press ENTER to Start", 30, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 30, center=True)
+        draw_text("Press ENTER to Start", 30, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2+30, center=True)
         draw_text("Press C for Controls", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.5, center=True)
         pygame.display.flip()
         for event in pygame.event.get():
@@ -327,17 +366,18 @@ def show_controls():
                 if event.key == pygame.K_ESCAPE:
                     controls = False
 
+final=False
 def main():
-    final = False
+    global final
+
     running = True
     clock = pygame.time.Clock()
     spawn_time = pygame.time.get_ticks()
-    wave_num = 1
+    wave_num = 3
     create_enemies(wave_num)
     while running:
         clock.tick(60)
         keys = pygame.key.get_pressed()
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -357,13 +397,20 @@ def main():
             spawn_powerup()
             spawn_time = pygame.time.get_ticks()
 
-        bullet = enemy_wave.update()
-        if bullet:
+        bullet= enemy_wave.update()
+        if bullet != None:
             all_sprites.add(bullet)
             enemybullets.add(bullet)
         bullets.update()
         enemybullets.update()
         score_texts.update()
+
+        if player.shielded and pygame.sprite.spritecollide(player, enemybullets, True):
+            player.shield_health -= 1
+            if player.shield_health <= 0:
+                player.deactivate_shield()
+            else:
+                player.draw_shield()
 
         hits = pygame.sprite.groupcollide(bullets, enemies, True, True)
         for hit in hits.values():
@@ -378,8 +425,8 @@ def main():
                 pygame.mixer.music.play()
 
         hits = pygame.sprite.groupcollide(enemybullets, player_group, True, False)
-        if hits:
-            player.lives -= 1 
+        if hits and not player.shielded:
+            player.lives -= 1
             pygame.mixer.music.load("Sounds/explosion.wav")
             pygame.mixer.music.set_volume(1)
             pygame.mixer.music.play()
@@ -392,9 +439,9 @@ def main():
                 pygame.time.wait(2000)
                 running = False
 
-        hits = pygame.sprite.groupcollide(bullets, enemies, True, True)
-        for hit in hits.values():
-            if not final:
+        if not final:
+            hits = pygame.sprite.groupcollide(bullets, enemies, True, True)
+            for hit in hits.values():
                 for enemy in hit:
                     player.score += enemy.points
                     score_text = ScoreText(enemy.rect.centerx, enemy.rect.centery, enemy)
@@ -404,17 +451,44 @@ def main():
                     pygame.mixer.music.load("Sounds/invaderkilled.wav")
                     pygame.mixer.music.set_volume(1)
                     pygame.mixer.music.play()
-            else:
-                enemy_wave.enemies[0].bosshits += 1
-                if enemy_wave.enemies[0].bosshits == 15:
-                    enemy_wave.enemies[0].kill()
-                    enemy_wave.remove_enemy(enemy_wave.enemies[0])
 
-        if not enemies and wave_num == 3 and not final:
-            finalboss = Finalboss()
-            enemy_wave.add_enemy(finalboss)
-            enemies.add(finalboss)
-            final = True
+            if not enemies and wave_num == 3:
+                boss_cinematic_entry()
+                pygame.mixer.music.stop()
+                pygame.mixer.Sound.play(finalboss_music)
+                enemy_wave.add_enemy(finalBoss)
+                enemies.add(finalBoss)
+                all_sprites.add(finalBoss)
+                final = True
+
+        else:
+            hits = pygame.sprite.groupcollide(bullets, enemies, True, False)
+            if hits:
+                finalBoss.health -= 1
+                finalBoss.draw_health_bar()
+                if finalBoss.health <= 0:
+                    pygame.mixer.Sound.play(explosion_sound)
+                    enemy_wave.remove_enemy(finalBoss)
+                    enemies.remove(finalBoss)
+                    draw_text("YOU DID IT.. YOU SAVED THE UNIVERSE!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
+                    pygame.display.flip()
+                    pygame.time.wait(3000)
+                    draw_text("However, there are more universes in need of saving,", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.5, center=True)
+                    draw_text("Do you want to play again? Y/N", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.4, center=True)
+                    pygame.display.flip()
+                    waiting = True
+                    while waiting:
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                pygame.quit()
+                                sys.exit()
+                            if event.type == pygame.KEYDOWN:
+                                if event.key == pygame.K_y:
+                                    main_menu()
+                                    main()
+                                if event.key == pygame.K_n:
+                                    pygame.quit()
+                                    sys.exit()
 
         if not enemies:
             draw_text("WAVE COMPLETE!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
@@ -422,9 +496,10 @@ def main():
             pygame.time.wait(2000)
             wave_num += 1
             if wave_num > 3:
-                wave_num = 1  # Reset wave number to 1 for looping
-                create_enemies(wave_num)
-                final = False  # Reset final boss flag
+                draw_text("YOU WIN!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
+                pygame.display.flip()
+                pygame.time.wait(2000)
+                running = False
             else:
                 create_enemies(wave_num)
                 for bullet in bullets:
