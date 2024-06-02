@@ -21,7 +21,7 @@ FINAL_WAVE = 15
 ENEMY_SLOWDOWN_DISTANCE = 25
 CUTSCENE_ENEMIES = 7
 SHIELD_HEALTH = 35
-FINAL_BOSS_HEALTH = 1500  # Variable to experiment with final boss health
+FINAL_BOSS_HEALTH = 75  # Variable to experiment with final boss health
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -180,16 +180,27 @@ class Enemy(pygame.sprite.Sprite):
 
 class Finalboss(Enemy):
     def __init__(self):
-        super().__init__(250,-50,(50,80),15,fast=True)
-        self.image = pygame.transform.scale(Finalboss_img,(200,190))
-        x= self.rect.x
-        y= self.rect.y
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.points=15
-        self.bosshits=0
+        super().__init__(250, -50, (200, 190), 15, fast=True)
+        self.image = pygame.transform.scale(Finalboss_img, (200, 190))
+        self.rect = self.image.get_rect(centerx=SCREEN_WIDTH // 2)
+        self.points = 15
+        self.bosshits = 0
         self.health = FINAL_BOSS_HEALTH
+        self.shoot_timer = pygame.time.get_ticks()
+
+    def update(self):
+        super().update()
+        self.draw_health_bar()
+        current_time = pygame.time.get_ticks()
+        if current_time - self.shoot_timer > 5000:
+            self.shoot()
+            self.shoot_timer = current_time
+
+    def shoot(self):
+        for offset in [-20, 20]:
+            bullet = Bullet(self.rect.centerx + offset, self.rect.bottom - 10, enemy_bullet, BULLET_SPEED)
+            all_sprites.add(bullet)
+            enemybullets.add(bullet)
 
     def draw_health_bar(self):
         bar_length = 100
@@ -249,7 +260,7 @@ class ScoreText(pygame.sprite.Sprite):
 class EnemyWave:
     def __init__(self):
         self.enemies = []
-        self.shoottime=10
+        self.shoottime = 10
 
     def add_enemy(self, enemy):
         self.enemies.append(enemy)
@@ -259,7 +270,7 @@ class EnemyWave:
             self.enemies.remove(enemy)
 
     def update(self):
-        self.shoottime-=1
+        self.shoottime -= 1
         for enemy in self.enemies:
             enemy.update()
             if enemy.rect.bottom >= SCREEN_HEIGHT:
@@ -275,9 +286,9 @@ class EnemyWave:
                     sys.exit()
                 enemy.kill()
                 self.remove_enemy(enemy)
-        if self.shoottime==0:
-            shooter= self.enemies[random.randint(0,len(self.enemies)-1)]
-            self.shoottime=10
+        if self.shoottime == 0:
+            shooter = self.enemies[random.randint(0, len(self.enemies) - 1)]
+            self.shoottime = 10
             return Bullet(shooter.rect.centerx, shooter.rect.y, enemy_bullet, BULLET_SPEED)
 
 player = Player()
@@ -289,9 +300,9 @@ powerups = pygame.sprite.Group()
 score_texts = pygame.sprite.Group()
 enemy_wave = EnemyWave()
 logo = pygame.sprite.Group()
-enemybullets= pygame.sprite.Group()
-finalBoss=Finalboss()
-final_boss=pygame.sprite.Group(finalBoss)
+enemybullets = pygame.sprite.Group()
+finalBoss = Finalboss()
+final_boss = pygame.sprite.Group(finalBoss)
 
 def create_enemies(wave_num):
     enemy_wave.enemies.clear()
@@ -299,9 +310,9 @@ def create_enemies(wave_num):
     if wave_num == 1:
         num_enemies = WAVE_1_ENEMIES
     elif wave_num == 2:
-        num_enemies=WAVE_2_ENEMIES
+        num_enemies = WAVE_2_ENEMIES
     else:
-        num_enemies=FINAL_WAVE # self expanatory - Kabir
+        num_enemies = FINAL_WAVE  # self-explanatory - Kabir
     positions = set()
     for i in range(num_enemies):
         size = random.choice([(50, 30), (75, 45), (125, 75)])
@@ -326,12 +337,12 @@ def spawn_powerup():
 def main_menu():
     menu = True
     logo_image = pygame.transform.scale(logo_img, (400, 200))
-    logo_rect = logo_image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3-50))
+    logo_rect = logo_image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3 - 50))
     while menu:
         screen.fill(BLACK)
         screen.blit(background_img, (0, 0))
         screen.blit(logo_image, logo_rect)
-        draw_text("Press ENTER to Start", 30, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2+30, center=True)
+        draw_text("Press ENTER to Start", 30, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 30, center=True)
         draw_text("Press C for Controls", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.5, center=True)
         pygame.display.flip()
         for event in pygame.event.get():
@@ -366,7 +377,8 @@ def show_controls():
                 if event.key == pygame.K_ESCAPE:
                     controls = False
 
-final=False
+final = False
+
 def main():
     global final
 
@@ -397,8 +409,8 @@ def main():
             spawn_powerup()
             spawn_time = pygame.time.get_ticks()
 
-        bullet= enemy_wave.update()
-        if bullet != None:
+        bullet = enemy_wave.update()
+        if bullet is not None:
             all_sprites.add(bullet)
             enemybullets.add(bullet)
         bullets.update()
@@ -470,6 +482,7 @@ def main():
                     pygame.mixer.Sound.play(explosion_sound)
                     enemy_wave.remove_enemy(finalBoss)
                     enemies.remove(finalBoss)
+                    tv_off_effect()
                     draw_text("YOU DID IT.. YOU SAVED THE UNIVERSE!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
                     pygame.display.flip()
                     pygame.time.wait(3000)
@@ -490,7 +503,7 @@ def main():
                                     pygame.quit()
                                     sys.exit()
 
-        if not enemies:
+        if not enemies and not final:
             draw_text("WAVE COMPLETE!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
             pygame.display.flip()
             pygame.time.wait(2000)
@@ -510,7 +523,10 @@ def main():
         all_sprites.draw(screen)
         draw_text(f"Score: {player.score}", 24, WHITE, SCREEN_WIDTH // 2, 10)
         draw_text(f"Lives: {player.lives}", 24, WHITE, SCREEN_WIDTH - 60, 10)
-        draw_text(f"Wave: {wave_num}", 24, WHITE, 40, 10)
+        if wave_num <= 3:
+            draw_text(f"Wave: {wave_num}", 24, WHITE, 40, 10)
+        else:
+            draw_text("LAST!", 24, WHITE, 40, 10)
         pygame.display.flip()
 
     pygame.quit()
