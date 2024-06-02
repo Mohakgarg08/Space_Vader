@@ -115,7 +115,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = SCREEN_WIDTH // 2
         self.rect.bottom = SCREEN_HEIGHT - 10
         self.speed = PLAYER_SPEED
-        self.lives = 20
+        self.lives = 15
         self.score = 0
         self.wins = 0
         self.powered_up = False
@@ -385,7 +385,7 @@ def main():
     running = True
     clock = pygame.time.Clock()
     spawn_time = pygame.time.get_ticks()
-    wave_num = 3
+    wave_num = 1
     create_enemies(wave_num)
     while running:
         clock.tick(60)
