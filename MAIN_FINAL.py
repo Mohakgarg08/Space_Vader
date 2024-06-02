@@ -496,4 +496,4 @@ if __name__ == "__main__":
     main_menu()
     main()
     
-    # all in all everything here is kinda self explanatory, if you need any specifics, just message me - Kabir
+    # all in all everything here is kinda self explanatory, if you need any specifics, just message us

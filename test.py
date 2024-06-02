@@ -312,7 +312,7 @@ def create_enemies(wave_num):
     elif wave_num == 2:
         num_enemies = WAVE_2_ENEMIES
     else:
-        num_enemies = FINAL_WAVE  # self-explanatory - Kabir
+        num_enemies = FINAL_WAVE  # self-explanatory 
     positions = set()
     for i in range(num_enemies):
         size = random.choice([(50, 30), (75, 45), (125, 75)])

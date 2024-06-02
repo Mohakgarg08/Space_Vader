@@ -42,12 +42,7 @@ libraries
 ```
 
 Reference
-- https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html#matplotlib.pyplot.tight_layout
-- https://www.geeksforgeeks.org/plotting-sine-and-cosine-graph-using-matloplib-in-python/
-- https://stackoverflow.com/questions/31556446/how-to-draw-axis-in-the-middle-of-the-figure
-- https://stackoverflow.com/questions/62160148/in-python-what-does-this-do-tan-y-1np-difftan-y-0
-- https://www.w3schools.com/python/ref_func_eval.asp
-
+-  https://www.pygame.org/docs/
 
 #### How the Program Works
 ##### Importing Libraries
@@ -61,9 +56,15 @@ This Snippet of code is used to import libraries that will be used in the progra
 
 ##### Classes 
 ```python
-
+class Player(pygame.sprite.Sprite):
+class Enemy(pygame.sprite.Sprite):
+class Finalboss(Enemy):
+class Bullet(pygame.sprite.Sprite):
+class Powerup(pygame.sprite.Sprite):
+class ScoreText(pygame.sprite.Sprite):
+class EnemyWave:
 ```
-This snippet of code is the start of the program after running the program. This snippet of code is asking the user what they want to do; **Basic Calculator**, **area calculator**, or **Graphing Calculator**. Acordin to the user choice it will jump to that 
+These lines of code are the where the diferent classes are being construted for example for the ``player`` class, ``enemy`` class. The player class is were constructes the code for the player shuch as its lives, size and etc.
 
 #### How to use my program?
 - Open your Python program 
