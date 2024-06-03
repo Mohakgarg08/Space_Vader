@@ -333,24 +333,36 @@ final_boss = pygame.sprite.Group(finalBoss)
 
 
 def create_enemies(wave_num):
+    # Clear the existing enemy wave
     enemy_wave.enemies.clear()
-    num_enemies = WAVE_1_ENEMIES
+
+    # Determine the number of enemies based on the wave number
     if wave_num == 1:
         num_enemies = WAVE_1_ENEMIES
     elif wave_num == 2:
         num_enemies = WAVE_2_ENEMIES
     else:
-        num_enemies = FINAL_WAVE  # self-explanatory 
+        num_enemies = FINAL_WAVE  # The final wave has a specific number of enemies
+
+    # Keep track of enemy positions to avoid overlap
     positions = set()
+
+    # Create the specified number of enemies
     for i in range(num_enemies):
+        # Choose a random enemy size
         size = random.choice([(50, 30), (75, 45), (125, 75)])
-        points = size[0] // 10
+        points = size[0] // 10  # Calculate points based on size
         x, y = random.randint(0, SCREEN_WIDTH - size[0]), random.randint(-1500, -50)
+
+        # Ensure enemies don't overlap
         while any(abs(x - pos[0]) < size[0] and abs(y - pos[1]) < size[1] for pos in positions):
             x, y = random.randint(0, SCREEN_WIDTH - size[0]), random.randint(-1500, -50)
-        positions.add((x, y))
+
+        # Create an enemy object
         fast = True if i < CUTSCENE_ENEMIES else False
         enemy = Enemy(x, y, size, points, fast)
+
+        # Add the enemy to sprite groups
         all_sprites.add(enemy)
         enemies.add(enemy)
         enemy_wave.add_enemy(enemy)
@@ -365,22 +377,35 @@ def spawn_powerup():
     powerups.add(powerup)
 
 def main_menu():
+    # Initialize the menu state
     menu = True
+
+    # Load and scale the game logo image
     logo_image = pygame.transform.scale(logo_img, (400, 200))
     logo_rect = logo_image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3 - 50))
+
+    # Main menu loop
     while menu:
+        # Clear the screen and display background
         screen.fill(BLACK)
         screen.blit(background_img, (0, 0))
         screen.blit(logo_image, logo_rect)
+
+        # Display menu options
         draw_text("Press ENTER to Start", 30, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 30, center=True)
         draw_text("Press C for Controls", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.5, center=True)
+
+        # Update the display
         pygame.display.flip()
+
+        # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
+                    # Start the game and play effects
                     menu = False
                     tv_off_effect()
                     cinematic_intro()
@@ -388,57 +413,79 @@ def main_menu():
                     pygame.mixer.Sound.play(background_music)
                     pygame.mixer.music.set_volume(0.9)
                 if event.key == pygame.K_c:
+                    # Show controls screen
                     show_controls()
 
+
 def show_controls():
+    # Initialize the controls state
     controls = True
+
+    # Main loop for displaying controls
     while controls:
+        # Clear the screen
         screen.fill(BLACK)
+
+        # Display the title "CONTROLS"
         draw_text("CONTROLS", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4, center=True)
+
+        # Display control instructions
         draw_text("Move: Arrow Keys", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
         draw_text("Shoot: Space Bar", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 40, center=True)
         draw_text("Press ESC to go back", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.5, center=True)
+
+        # Update the display
         pygame.display.flip()
+
+        # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
+                    # Exit the controls screen
                     controls = False
+
 
 final = False
 
 def main():
-    global final
+    global final  # Indicates whether the final boss battle is active
 
     running = True
     clock = pygame.time.Clock()
     spawn_time = pygame.time.get_ticks()
     wave_num = 1
-    create_enemies(wave_num)
+    create_enemies(wave_num)  # Initialize enemies for the first wave
+
     while running:
-        clock.tick(60)
-        keys = pygame.key.get_pressed()
+        clock.tick(60)  # Limit frame rate to 60 
+        keys = pygame.key.get_pressed()  # Get the state of keyboard keys
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                running = False  # Exit the game if the window is closed
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and len(bullets) < MAX_BULLETS:
+                    # Shoot bullets when the Space Bar is pressed
                     player.shoot()
                     pygame.mixer.music.load("Sounds/shoot.wav")
                     pygame.mixer.music.set_volume(0.5)
                     pygame.mixer.music.play()
 
+        # Update player, bullets, powerups, and score texts
         player.update(keys)
         bullets.update()
         powerups.update()
         score_texts.update()
 
+        # Spawn powerups 
         if pygame.time.get_ticks() - spawn_time > POWERUP_SPAWN_INTERVAL:
             spawn_powerup()
             spawn_time = pygame.time.get_ticks()
 
+        # Update enemy wave and handle enemy bullets
         bullet = enemy_wave.update()
         if bullet is not None:
             all_sprites.add(bullet)
@@ -447,6 +494,7 @@ def main():
         enemybullets.update()
         score_texts.update()
 
+        # Handle player shield collisions with enemy bullets
         if player.shielded and pygame.sprite.spritecollide(player, enemybullets, True):
             player.shield_health -= 1
             if player.shield_health <= 0:
@@ -454,6 +502,7 @@ def main():
             else:
                 player.draw_shield()
 
+        # Handle collisions between player bullets and enemies
         hits = pygame.sprite.groupcollide(bullets, enemies, True, True)
         for hit in hits.values():
             for enemy in hit:
@@ -466,6 +515,43 @@ def main():
                 pygame.mixer.music.set_volume(1)
                 pygame.mixer.music.play()
 
+        # Check if the final boss battle is active
+        if not final:
+            # Handle collisions between player bullets and enemies
+            hits = pygame.sprite.groupcollide(bullets, enemies, True, True)
+            for hit in hits.values():
+                for enemy in hit:
+                    player.score += enemy.points
+                    score_text = ScoreText(enemy.rect.centerx, enemy.rect.centery, enemy)
+                    all_sprites.add(score_text)
+                    score_texts.add(score_text)
+                    enemy_wave.remove_enemy(enemy)
+                    pygame.mixer.music.load("Sounds/invaderkilled.wav")
+                    pygame.mixer.music.set_volume(1)
+                    pygame.mixer.music.play()
+
+            # Check if all enemies are defeated in the final wave
+            if not enemies and wave_num == 3:
+                # Activate the final boss battle
+                boss_cinematic_entry()
+                pygame.mixer.music.stop()
+                pygame.mixer.Sound.play(finalboss_music)
+                enemy_wave.add_enemy(finalBoss)
+                enemies.add(finalBoss)
+                all_sprites.add(finalBoss)
+                final = True
+
+        else:
+            # Handle collisions between player bullets and the final boss
+            hits = pygame.sprite.groupcollide(bullets, enemies, True, False)
+            if hits:
+                finalBoss.health -= 1
+                finalBoss.draw_health_bar()
+                if finalBoss.health <= 0:
+                    pygame.mixer.Sound.play(explosion_sound)
+
+
+            # Check for collisions between enemy bullets and the player
         hits = pygame.sprite.groupcollide(enemybullets, player_group, True, False)
         if hits and not player.shielded:
             player.lives -= 1
@@ -481,6 +567,7 @@ def main():
                 pygame.time.wait(2000)
                 running = False
 
+        # Check for collisions between player bullets and enemies
         if not final:
             hits = pygame.sprite.groupcollide(bullets, enemies, True, True)
             for hit in hits.values():
@@ -494,28 +581,34 @@ def main():
                     pygame.mixer.music.set_volume(1)
                     pygame.mixer.music.play()
 
+
+            # Check if all enemies are defeated and it's the final wave
             if not enemies and wave_num == 3:
                 boss_cinematic_entry()
                 pygame.mixer.music.stop()
                 pygame.mixer.Sound.play(finalboss_music)
                 enemy_wave.add_enemy(finalBoss)
                 enemies.add(finalBoss)
-                all_sprites.add(finalBoss)
-                final = True
+
 
         else:
+            # Check for collisions between player bullets and enemies
             hits = pygame.sprite.groupcollide(bullets, enemies, True, False)
             if hits:
+                # Reduce the health of the final boss
                 finalBoss.health -= 1
                 finalBoss.draw_health_bar()
                 if finalBoss.health <= 0:
+                    # Play explosion sound and remove the final boss
                     pygame.mixer.Sound.play(explosion_sound)
                     enemy_wave.remove_enemy(finalBoss)
                     enemies.remove(finalBoss)
                     tv_off_effect()
+                    # Display victory message
                     draw_text("YOU DID IT.. YOU SAVED THE UNIVERSE!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
                     pygame.display.flip()
                     pygame.time.wait(3000)
+                    # Prompt user to play again
                     draw_text("However, there are more universes in need of saving,", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.5, center=True)
                     draw_text("Do you want to play again? Y/N", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.4, center=True)
                     pygame.display.flip()
@@ -533,21 +626,26 @@ def main():
                                     pygame.quit()
                                     sys.exit()
 
+
         if not enemies and not final:
+            # Display "WAVE COMPLETE!" message
             draw_text("WAVE COMPLETE!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
             pygame.display.flip()
             pygame.time.wait(2000)
             wave_num += 1
             if wave_num > 3:
+                # If all waves are completed, display "YOU WIN!" message
                 draw_text("YOU WIN!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
                 pygame.display.flip()
                 pygame.time.wait(2000)
                 running = False
             else:
+                # Create enemies for the next wave and remove existing bullets
                 create_enemies(wave_num)
                 for bullet in bullets:
                     bullet.kill()
 
+                # Refresh the screen and display relevant information
         screen.fill(BLACK)
         screen.blit(background_img, (0, 0))
         all_sprites.draw(screen)
@@ -558,7 +656,7 @@ def main():
         else:
             draw_text("LAST!", 24, WHITE, 40, 10)
         pygame.display.flip()
-
+# exit the game
     pygame.quit()
     sys.exit()
 
