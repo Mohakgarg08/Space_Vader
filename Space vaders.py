@@ -4,13 +4,14 @@ import sys
 
 pygame.init()
 
+# This is the setting the screen height and width
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
 # settings
-PLAYER_SPEED = 5
-ENEMY_SPEED = 1
-BULLET_SPEED = 7
+PLAYER_SPEED = 5 
+ENEMY_SPEED = 1 
+BULLET_SPEED = 7 
 ENEMY_DROP = 30
 POWERUP_SPAWN_INTERVAL = 5000  # this is in milliseconds if you want to change it
 MAX_BULLETS = 3
@@ -23,12 +24,14 @@ CUTSCENE_ENEMIES = 7
 SHIELD_HEALTH = 35
 FINAL_BOSS_HEALTH = 75  # Variable to experiment with final boss health
 
+# This is the colors for the game
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
+#This is setting the screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Space Vaders")
 
