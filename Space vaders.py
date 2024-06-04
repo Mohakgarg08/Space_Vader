@@ -297,7 +297,7 @@ class EnemyWave:
                     sys.exit()
                 enemy.kill()
                 self.remove_enemy(enemy)
-        if self.shoottime == 0:
+        if self.shoottime == 0 and len(self.enemies)>0 :
             shooter = self.enemies[random.randint(0, len(self.enemies) - 1)]
             self.shoottime = 10
             return Bullet(shooter.rect.centerx, shooter.rect.y, enemy_bullet, BULLET_SPEED)
@@ -448,7 +448,7 @@ def main():
     running = True
     clock = pygame.time.Clock()
     spawn_time = pygame.time.get_ticks()
-    wave_num = 1
+    wave_num = 3
     create_enemies(wave_num) # Initialize enemies for the first wave
     while running:
         clock.tick(60) # Limit frame rate to 60 
