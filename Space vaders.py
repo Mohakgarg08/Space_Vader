@@ -454,7 +454,7 @@ def main():
     running = True
     clock = pygame.time.Clock()
     spawn_time = pygame.time.get_ticks()
-    wave_num = 3
+    wave_num = 1
     create_enemies(wave_num) # Initialize enemies for the first wave
     while running:
         clock.tick(60) # Limit frame rate to 60 
