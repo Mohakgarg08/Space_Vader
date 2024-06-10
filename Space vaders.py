@@ -22,7 +22,7 @@ FINAL_WAVE = 15
 ENEMY_SLOWDOWN_DISTANCE = 25
 CUTSCENE_ENEMIES = 7
 SHIELD_HEALTH = 35
-FINAL_BOSS_HEALTH = 75  # Variable to experiment with final boss health
+FINAL_BOSS_HEALTH = 5  # Variable to experiment with final boss health
 
 # This is the colors for the game
 WHITE = (255, 255, 255)
@@ -129,6 +129,7 @@ class Player(pygame.sprite.Sprite):
         self.powerup_time = 0
         self.shielded = False
         self.shield_health = SHIELD_HEALTH
+        self.hasshield=False
 
     def update(self, keys):
         if keys[pygame.K_LEFT] and self.rect.left > 0:
@@ -141,8 +142,10 @@ class Player(pygame.sprite.Sprite):
             self.rect.y += self.speed
         if self.powered_up and pygame.time.get_ticks() > self.powerup_time:
             self.powered_up = False
-        if keys[pygame.K_f] and self.shielded:
+        if keys[pygame.K_f] and self.hasshield and final:
             self.activate_shield()
+            self.hasshield=False
+
 
     def shoot(self):
         if self.powered_up:
@@ -157,6 +160,8 @@ class Player(pygame.sprite.Sprite):
 
     def activate_shield(self):
         self.shielded = True
+        self.shield_health=SHIELD_HEALTH
+
 
     def deactivate_shield(self):
         self.shielded = False
@@ -189,13 +194,14 @@ class Enemy(pygame.sprite.Sprite):
 # This is the Finalboss class where all the characteristics of the Final boss are.
 class Finalboss(Enemy):
     def __init__(self):
-        super().__init__(250, -50, (200, 190), 15, fast=True)
+        super().__init__(250, -100, (150, 140), 15, fast=False)
         self.image = pygame.transform.scale(Finalboss_img, (200, 190))
         self.rect = self.image.get_rect(centerx=SCREEN_WIDTH // 2)
         self.points = 15
         self.bosshits = 0
         self.health = FINAL_BOSS_HEALTH
         self.shoot_timer = pygame.time.get_ticks()
+        self.speed=0.5
 
     def update(self):
         super().update()
@@ -247,7 +253,7 @@ class Powerup(pygame.sprite.Sprite):
         if pygame.sprite.collide_rect(self, player):
             player.powered_up = True
             player.powerup_time = pygame.time.get_ticks() + 5000
-            player.shielded = True
+            player.hasshield = final
             self.kill()
 
 # This is the Scoretext class where all the characteristics of the score are.
@@ -484,43 +490,29 @@ def main():
         enemybullets.update()
         score_texts.update()
 
-        # Handle player shield collisions with enemy bullets
-        if player.shielded and pygame.sprite.spritecollide(player, enemybullets, True):
-            player.shield_health -= 1
-            if player.shield_health <= 0:
-                player.deactivate_shield()
-            else:
-                player.draw_shield()
-        
-        # Handle collisions between player bullets and enemies
-        hits = pygame.sprite.groupcollide(bullets, enemies, True, True)
-        for hit in hits.values():
-            for enemy in hit:
-                player.score += enemy.points
-                score_text = ScoreText(enemy.rect.centerx, enemy.rect.centery, enemy)
-                all_sprites.add(score_text)
-                score_texts.add(score_text)
-                enemy_wave.remove_enemy(enemy)
-                pygame.mixer.music.load("Sounds/invaderkilled.wav")
-                pygame.mixer.music.set_volume(1)
-                pygame.mixer.music.play()
-        
         # Handle collisions between enemy bullets and player
         hits = pygame.sprite.groupcollide(enemybullets, player_group, True, False)
-        if hits and not player.shielded:
-            player.lives -= 1
-            pygame.mixer.music.load("Sounds/explosion.wav")
-            pygame.mixer.music.set_volume(1)
-            pygame.mixer.music.play()
-            if player.lives == 0:
-                draw_text("YOU LOST!", 64, RED, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-                pygame.mixer.music.load("Sounds/You Lose Sound Effect.mp3")
-                pygame.mixer.music.set_volume(20)
+        for hit in hits:
+            if not player.shielded:
+                player.lives -= 1
+                pygame.mixer.music.load("Sounds/explosion.wav")
+                pygame.mixer.music.set_volume(1)
                 pygame.mixer.music.play()
-                pygame.display.flip()
-                pygame.time.wait(2000)
-                running = False
-       
+                if player.lives == 0:
+                    draw_text("YOU LOST!", 64, RED, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+                    pygame.mixer.music.load("Sounds/You Lose Sound Effect.mp3")
+                    pygame.mixer.music.set_volume(20)
+                    pygame.mixer.music.play()
+                    pygame.display.flip()
+                    pygame.time.wait(2000)
+                    running = False
+            # Handle player shield collisions with enemy bullets
+            else: #player.shielded and pygame.sprite.spritecollide(player, enemybullets, True):
+                player.shield_health -= 1
+                if player.shield_health <= 0:
+                    player.deactivate_shield()
+                
+
         # Check if the final boss battle is active
         if not final:
             # Handle collisions between player bullets and enemies
@@ -545,12 +537,15 @@ def main():
                 enemy_wave.add_enemy(finalBoss)
                 enemies.add(finalBoss)
                 all_sprites.add(finalBoss)
+                
                 final = True
 
         else:
             # Check for collisions between player bullets and enemies
             hits = pygame.sprite.groupcollide(bullets, enemies, True, False)
-            if hits:
+            #print(hits)
+            if len(hits)>0:
+                print(hits)
                 # Reduce the health of the final boss
                 finalBoss.health -= 1
                 finalBoss.draw_health_bar()
@@ -562,7 +557,7 @@ def main():
                     tv_off_effect()
                     
                     # Display win message
-                    draw_text("YOU DID IT.. YOU SAVED THE UNIVERSE!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
+                    draw_text("YOU DID IT.. YOU SAVED THE UNIVERSE!", 58, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
                     pygame.display.flip()
                     pygame.time.wait(3000)
                     
@@ -583,6 +578,14 @@ def main():
                                 if event.key == pygame.K_n:
                                     pygame.quit()
                                     sys.exit()
+        if finalBoss.rect.bottom>410:
+            draw_text("YOU LOST!", 64, RED, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+            pygame.mixer.music.load("Sounds/You Lose Sound Effect.mp3")
+            pygame.mixer.music.set_volume(20)
+            pygame.mixer.music.play()
+            pygame.display.flip()
+            pygame.time.wait(2000)
+            running = False
 
         if not enemies and not final:
             # Display "WAVE COMPLETE!" message
@@ -605,6 +608,8 @@ def main():
         screen.fill(BLACK)
         screen.blit(background_img, (0, 0))
         all_sprites.draw(screen)
+        if player.shielded:
+            player.draw_shield()
         draw_text(f"Score: {player.score}", 24, WHITE, SCREEN_WIDTH // 2, 10)
         draw_text(f"Lives: {player.lives}", 24, WHITE, SCREEN_WIDTH - 60, 10)
         if wave_num <= 3:
