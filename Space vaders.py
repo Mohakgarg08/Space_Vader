@@ -37,19 +37,19 @@ pygame.display.set_caption("Space Vaders")
 
 
 # saving the images and the audios in a variable.
-player_img = pygame.image.load('Images/Invader1.png').convert_alpha()
-enemy_img = pygame.image.load('Images/EnemyShip.png').convert_alpha()
-bullet_img = pygame.image.load('Images/bullett.png').convert_alpha()
-powerup_img = pygame.image.load('Images/Powerup.png').convert_alpha()
-enemy_bullet = pygame.image.load('Images/EnemyBullet.png').convert_alpha()
-background_img = pygame.image.load('Images/StarBackground.png').convert_alpha()
-logo_img = pygame.image.load('Images/Logo1.png').convert_alpha()
-Finalboss_img = pygame.image.load('Images/FinalBoss.png').convert_alpha()
-hyperdrive_sound = pygame.mixer.Sound('Sounds/HyperDrive.mp3')
-background_music = pygame.mixer.Sound('Sounds/SpaceInvadersmusic.mp3')
-finalboss_music = pygame.mixer.Sound('Sounds/finalbossmusic.mp3')
-lose_sound = pygame.mixer.Sound('Sounds/You Lose Sound Effect.mp3')
-explosion_sound = pygame.mixer.Sound('Sounds/Explosion.mp3')  # Placeholder for explosion sound
+player_img = pygame.image.load('Space_Vader/Images/Invader1.png').convert_alpha()
+enemy_img = pygame.image.load('Space_Vader/Images/EnemyShip.png').convert_alpha()
+bullet_img = pygame.image.load('Space_Vader/Images/bullett.png').convert_alpha()
+powerup_img = pygame.image.load('Space_Vader/Images/Powerup.png').convert_alpha()
+enemy_bullet = pygame.image.load('Space_Vader/Images/EnemyBullet.png').convert_alpha()
+background_img = pygame.image.load('Space_Vader/Images/StarBackground.png').convert_alpha()
+logo_img = pygame.image.load('Space_Vader/Images/Logo1.png').convert_alpha()
+Finalboss_img = pygame.image.load('Space_Vader/Images/FinalBoss.png').convert_alpha()
+hyperdrive_sound = pygame.mixer.Sound('Space_Vader/Sounds/HyperDrive.mp3')
+background_music = pygame.mixer.Sound('Space_Vader/Sounds/SpaceInvadersmusic.mp3')
+finalboss_music = pygame.mixer.Sound('Space_Vader/Sounds/finalbossmusic.mp3')
+lose_sound = pygame.mixer.Sound('Space_Vader/Sounds/You Lose Sound Effect.mp3')
+explosion_sound = pygame.mixer.Sound('Space_Vader/Sounds/Explosion.mp3')  # Placeholder for explosion sound
 
 
 def draw_text(text, size, color, x, y, font_name=None, center=False):
