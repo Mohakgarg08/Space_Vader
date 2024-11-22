@@ -1,7 +1,7 @@
 import pygame
 import random
 import sys
-
+import os
 pygame.init()
 
 # This is the setting the screen height and width
@@ -35,22 +35,36 @@ BLUE = (0, 0, 255)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Space Vaders")
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
-# saving the images and the audios in a variable.
-player_img = pygame.image.load('Space_Vader/Images/Invader1.png').convert_alpha()
-enemy_img = pygame.image.load('Space_Vader/Images/EnemyShip.png').convert_alpha()
-bullet_img = pygame.image.load('Space_Vader/Images/bullett.png').convert_alpha()
-powerup_img = pygame.image.load('Space_Vader/Images/Powerup.png').convert_alpha()
-enemy_bullet = pygame.image.load('Space_Vader/Images/EnemyBullet.png').convert_alpha()
-background_img = pygame.image.load('Space_Vader/Images/StarBackground.png').convert_alpha()
-logo_img = pygame.image.load('Space_Vader/Images/Logo1.png').convert_alpha()
-Finalboss_img = pygame.image.load('Space_Vader/Images/FinalBoss.png').convert_alpha()
-hyperdrive_sound = pygame.mixer.Sound('Space_Vader/Sounds/HyperDrive.mp3')
-background_music = pygame.mixer.Sound('Space_Vader/Sounds/SpaceInvadersmusic.mp3')
-finalboss_music = pygame.mixer.Sound('Space_Vader/Sounds/finalbossmusic.mp3')
-lose_sound = pygame.mixer.Sound('Space_Vader/Sounds/You Lose Sound Effect.mp3')
-explosion_sound = pygame.mixer.Sound('Space_Vader/Sounds/Explosion.mp3')  # Placeholder for explosion sound
+# Build paths to images and sounds
+images_dir = os.path.join(script_dir, 'Images')
+sounds_dir = os.path.join(script_dir, 'Sounds')
 
+# Load images and sounds using dynamic paths
+player_img = pygame.image.load(os.path.join(images_dir, 'Invader1.png')).convert_alpha()
+enemy_img = pygame.image.load(os.path.join(images_dir, 'EnemyShip.png')).convert_alpha()
+bullet_img = pygame.image.load(os.path.join(images_dir, 'bullett.png')).convert_alpha()
+powerup_img = pygame.image.load(os.path.join(images_dir, 'Powerup.png')).convert_alpha()
+enemy_bullet = pygame.image.load(os.path.join(images_dir, 'EnemyBullet.png')).convert_alpha()
+background_img = pygame.image.load(os.path.join(images_dir, 'StarBackground.png')).convert_alpha()
+logo_img = pygame.image.load(os.path.join(images_dir, 'Logo1.png')).convert_alpha()
+Finalboss_img = pygame.image.load(os.path.join(images_dir, 'FinalBoss.png')).convert_alpha()
+
+hyperdrive_sound = pygame.mixer.Sound(os.path.join(sounds_dir, 'HyperDrive.mp3'))
+background_music = pygame.mixer.Sound(os.path.join(sounds_dir, 'SpaceInvadersmusic.mp3'))
+finalboss_music = pygame.mixer.Sound(os.path.join(sounds_dir, 'finalbossmusic.mp3'))
+lose_sound = pygame.mixer.Sound(os.path.join(sounds_dir, 'You Lose Sound Effect.mp3'))
+explosion_sound = pygame.mixer.Sound(os.path.join(sounds_dir, 'Explosion.mp3'))
+
+def playerhealth(x, y, current_health, max_health, color=RED):
+        bar_length = 150
+        bar_height = 15
+        fill = (current_health / max_health) * bar_length
+        outline_rect = pygame.Rect(x, y, bar_length, bar_height)
+        fill_rect = pygame.Rect(x, y, fill, bar_height)
+        pygame.draw.rect(screen, color, fill_rect)
+        pygame.draw.rect(screen, WHITE, outline_rect, 2)
 
 def draw_text(text, size, color, x, y, font_name=None, center=False):
     font = pygame.font.Font(font_name, size)
@@ -84,7 +98,7 @@ def tv_off_effect():
     pygame.time.wait(700)
     draw_text("GO!", 64, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
     pygame.display.flip()
-    pygame.time.wait(2100)
+    pygame.time.wait(1400)
     screen.fill(BLACK)
     pygame.display.flip()
 
@@ -93,10 +107,10 @@ def cinematic_intro():
     pygame.draw.rect(screen, BLACK, (0, 0, SCREEN_WIDTH, 50))
     pygame.draw.rect(screen, BLACK, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
     pygame.display.flip()
-    pygame.time.wait(1500)
+    pygame.time.wait(950)
     pygame.mixer.Sound.play(hyperdrive_sound)
-    pygame.mixer.music.set_volume(0.01)
-    pygame.time.wait(2000)
+    pygame.mixer.music.set_volume(0.001)
+    pygame.time.wait(1500)
     screen.fill(BLACK)
     pygame.display.flip()
 
@@ -132,20 +146,24 @@ class Player(pygame.sprite.Sprite):
         self.hasshield=False
 
     def update(self, keys):
-        if keys[pygame.K_LEFT] and self.rect.left > 0:
+        # Movement: WASD or Arrow Keys
+        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and self.rect.left > 0:
             self.rect.x -= self.speed
-        if keys[pygame.K_RIGHT] and self.rect.right < SCREEN_WIDTH:
+        if (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and self.rect.right < SCREEN_WIDTH:
             self.rect.x += self.speed
-        if keys[pygame.K_UP] and self.rect.top > 300:
+        if (keys[pygame.K_UP] or keys[pygame.K_w]) and self.rect.top > 300:
             self.rect.y -= self.speed
-        if keys[pygame.K_DOWN] and self.rect.bottom < 595:
+        if (keys[pygame.K_DOWN] or keys[pygame.K_s]) and self.rect.bottom < 595:
             self.rect.y += self.speed
+
+        # Check if powerup duration is over
         if self.powered_up and pygame.time.get_ticks() > self.powerup_time:
             self.powered_up = False
+
+        # Shield activation
         if keys[pygame.K_f] and self.hasshield and final:
             self.activate_shield()
-            self.hasshield=False
-
+            self.hasshield = False
 
     def shoot(self):
         if self.powered_up:
@@ -336,7 +354,6 @@ enemybullets = pygame.sprite.Group()
 # Initialize the final boss
 finalBoss = Finalboss()
 final_boss = pygame.sprite.Group(finalBoss)
-
 
 def create_enemies(wave_num):
     # Clear the existing enemy wave
@@ -617,6 +634,9 @@ def main():
         else:
             draw_text("LAST!", 24, WHITE, 40, 10)
         pygame.display.flip()
+        
+    playerhealth(10, SCREEN_HEIGHT - 30, player.lives, 15, GREEN)
+
 # exit the game
     pygame.quit()
     sys.exit()
