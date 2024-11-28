@@ -1,7 +1,7 @@
 import pygame
 import random
 import sys
-
+import os
 # Initialize pygame
 pygame.init()
 
@@ -32,6 +32,30 @@ ENEMY_SLOWDOWN_DISTANCE = 25
 CUTSCENE_ENEMIES = 7
 SHIELD_HEALTH = 35
 FINAL_BOSS_HEALTH = 5  # Variable to experiment with final boss health
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Build paths to images and sounds
+images_dir = os.path.join(script_dir, 'Images')
+sounds_dir = os.path.join(script_dir, 'Sounds')
+
+# Load images and sounds using dynamic paths
+player_img = pygame.image.load(os.path.join(images_dir, 'Invader1.png')).convert_alpha()
+enemy_img = pygame.image.load(os.path.join(images_dir, 'EnemyShip.png')).convert_alpha()
+bullet_img = pygame.image.load(os.path.join(images_dir, 'bullett.png')).convert_alpha()
+powerup_img = pygame.image.load(os.path.join(images_dir, 'Powerup.png')).convert_alpha()
+enemy_bullet = pygame.image.load(os.path.join(images_dir, 'EnemyBullet.png')).convert_alpha()
+background_img = pygame.image.load(os.path.join(images_dir, 'StarBackground.png')).convert_alpha()
+logo_img = pygame.image.load(os.path.join(images_dir, 'Logo1.png')).convert_alpha()
+Finalboss_img = pygame.image.load(os.path.join(images_dir, 'FinalBoss.png')).convert_alpha()
+ 
+hyperdrive_sound = pygame.mixer.Sound(os.path.join(sounds_dir, 'HyperDrive.mp3'))
+background_music = pygame.mixer.Sound(os.path.join(sounds_dir, 'SpaceInvadersmusic.mp3'))
+finalboss_music = pygame.mixer.Sound(os.path.join(sounds_dir, 'finalbossmusic.mp3'))
+lose_sound = pygame.mixer.Sound(os.path.join(sounds_dir, 'You Lose Sound Effect.mp3'))
+explosion_sound = pygame.mixer.Sound(os.path.join(sounds_dir, 'Explosion.mp3'))
+# Create a sprite group for the game logo
+logo = pygame.sprite.Group()
 
 # Health bar function
 def draw_health_bar(x, y, current_health, max_health, color=RED):
@@ -114,12 +138,16 @@ def main_menu():
     for _ in range(100):
         star = Star(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT))
         stars.add(star)
-
+    # Load and scale the game logo image
+    logo_image = pygame.transform.scale(logo_img, (400, 200))
+    logo_rect = logo_image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3 - 50))
+    
     menu = True
     while menu:
         screen.fill(BLACK)
         stars.update()
         stars.draw(screen)
+        screen.blit(logo_image, logo_rect)
         draw_text("Press ENTER to Start", 30, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 30, center=True)
         draw_text("Press C for Controls", 24, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.5, center=True)
         pygame.display.flip()
