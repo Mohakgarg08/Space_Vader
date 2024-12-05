@@ -483,7 +483,7 @@ def main():
                 if event.key == pygame.K_SPACE and len(bullets) < MAX_BULLETS:
                      # Shoot bullets when the Space Bar is pressed
                     player.shoot()
-                    pygame.mixer.music.load("Sounds/shoot.wav")
+                    pygame.mixer.music.load("Space_vader/Sounds/shoot.wav")
                     pygame.mixer.music.set_volume(0.5)
                     pygame.mixer.music.play()
         
@@ -512,7 +512,7 @@ def main():
         for hit in hits:
             if not player.shielded:
                 player.lives -= 1
-                pygame.mixer.music.load("Sounds/explosion.wav")
+                pygame.mixer.music.load("Space_vader/Sounds/explosion.wav")
                 pygame.mixer.music.set_volume(1)
                 pygame.mixer.music.play()
                 if player.lives == 0:
@@ -541,7 +541,7 @@ def main():
                     all_sprites.add(score_text)
                     score_texts.add(score_text)
                     enemy_wave.remove_enemy(enemy)
-                    pygame.mixer.music.load("Sounds/invaderkilled.wav")
+                    pygame.mixer.music.load("Space_vader/Sounds/invaderkilled.wav")
                     pygame.mixer.music.set_volume(1)
                     pygame.mixer.music.play()
             
