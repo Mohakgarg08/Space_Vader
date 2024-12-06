@@ -2,6 +2,7 @@ import pygame
 import random
 import sys
 import os
+import cv2
 pygame.init()
 
 # This is the setting the screen height and width
@@ -50,6 +51,7 @@ enemy_bullet = pygame.image.load(os.path.join(images_dir, 'EnemyBullet.png')).co
 background_img = pygame.image.load(os.path.join(images_dir, 'StarBackground.png')).convert_alpha()
 logo_img = pygame.image.load(os.path.join(images_dir, 'Logo1.png')).convert_alpha()
 Finalboss_img = pygame.image.load(os.path.join(images_dir, 'FinalBoss.png')).convert_alpha()
+intro_vid= pygame.movie.Movie("Alian invsion\intro.mp4")
  
 hyperdrive_sound = pygame.mixer.Sound(os.path.join(sounds_dir, 'HyperDrive.mp3'))
 background_music = pygame.mixer.Sound(os.path.join(sounds_dir, 'SpaceInvadersmusic.mp3'))
@@ -103,6 +105,7 @@ def tv_off_effect():
     pygame.display.flip()
 
 def cinematic_intro():
+    video = cv2.VideoCapture()
     draw_text("So it begins...", 44, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 , center=True)
     pygame.draw.rect(screen, BLACK, (0, 0, SCREEN_WIDTH, 50))
     pygame.draw.rect(screen, BLACK, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
@@ -517,7 +520,7 @@ def main():
                 pygame.mixer.music.play()
                 if player.lives == 0:
                     draw_text("YOU LOST!", 64, RED, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-                    pygame.mixer.music.load("Sounds/You Lose Sound Effect.mp3")
+                    pygame.mixer.music.load("Space_Vader\Sounds\You Lose Sound Effect.mp3")
                     pygame.mixer.music.set_volume(20)
                     pygame.mixer.music.play()
                     pygame.display.flip()
@@ -643,4 +646,4 @@ def main():
 
 if __name__ == "__main__":
     main_menu()
-    main()
+    main()    
